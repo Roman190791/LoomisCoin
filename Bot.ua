@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-TOKEN = "LoomisCoin"
+TOKEN = "LoomisCoin"  # Замінити на твій реальний токен
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привіт! Вітаю в грі! Напиши /play, щоб почати.")
