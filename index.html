@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AI Clicker</title>
+    <title>AI Clicker Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #131313;
+            background-color: #0f0f0f;
             color: white;
             display: flex;
             flex-direction: column;
@@ -15,68 +15,166 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
             overflow: hidden;
             user-select: none;
+            touch-action: manipulation;
         }
+
         .score-container {
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 20px;
+            font-size: 56px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 136, 204, 0.5);
+        }
+
+        .coin-wrapper {
+            position: relative;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 10px;
         }
+
         #coin {
-            width: 250px;
-            height: 250px;
-            border-radius: 50%;
+            width: 280px;
+            height: 280px;
             cursor: pointer;
-            transition: transform 0.05s active;
-            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.05s ease;
+            filter: drop-shadow(0 0 15px #0088cc);
         }
+
         #coin:active {
-            transform: scale(0.92);
+            transform: scale(0.95);
         }
-        .token-name {
+
+        /* Анімація вилітаючої цифри */
+        .plus-one {
+            position: absolute;
             color: #0088cc;
-            font-size: 18px;
-            margin-top: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: moveUp 0.8s ease-out forwards;
+        }
+
+        @keyframes moveUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-150px); opacity: 0; }
+        }
+
+        /* Енергія */
+        .energy-container {
+            width: 80%;
+            max-width: 300px;
+            margin-top: 40px;
+        }
+
+        .energy-bar {
+            width: 100%;
+            height: 12px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #energy-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #0088cc, #00ffcc);
+            transition: width 0.1s;
+        }
+
+        .energy-text {
+            margin-top: 8px;
+            font-size: 16px;
+            color: #aaa;
         }
     </style>
 </head>
 <body>
 
-    <div class="score-container">
-        <span id="balance">0</span>
+    <div class="score-container" id="balance">0</div>
+    
+    <div class="coin-wrapper" id="click-area">
+        <img id="coin" src="https://cdn-icons-png.flaticon.com/512/2091/2091665.png" alt="Click!">
     </div>
-    
-    <img id="coin" src="https://cdn-icons-png.flaticon.com/512/2091/2091665.png" alt="Click!">
-    
-    <div class="token-name">$AI_COMMUNITY TOKEN</div>
+
+    <div class="energy-container">
+        <div class="energy-bar">
+            <div id="energy-fill"></div>
+        </div>
+        <div class="energy-text">⚡ <span id="energy-count">1000</span> / 1000</div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const balanceEl = document.getElementById('balance');
         const coin = document.getElementById('coin');
+        const clickArea = document.getElementById('click-area');
+        const energyFill = document.getElementById('energy-fill');
+        const energyCountEl = document.getElementById('energy-count');
 
-        // Повідомляємо Telegram, що додаток готовий
-        tg.expand(); 
-        
-        // Завантажуємо збережений прогрес
+        tg.expand();
+
         let count = parseInt(localStorage.getItem('coins')) || 0;
-        balanceEl.innerText = count;
+        let energy = parseInt(localStorage.getItem('energy')) || 1000;
+        const maxEnergy = 1000;
 
-        coin.onclick = () => {
-            count++;
-            balanceEl.innerText = count;
-            localStorage.setItem('coins', count);
+        balanceEl.innerText = count.toLocaleString();
+        updateEnergyUI();
 
-            // Легка вібрація
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
+        // Функція кліку
+        clickArea.addEventListener('touchstart', (e) => {
+            if (energy > 0) {
+                // Логіка монет
+                count++;
+                energy--;
+                
+                balanceEl.innerText = count.toLocaleString();
+                updateEnergyUI();
+                saveData();
+
+                // Вібрація
+                tg.HapticFeedback.impactOccurred('medium');
+
+                // Створення +1 у місці дотику
+                const touch = e.touches[0];
+                createPlusOne(touch.clientX, touch.clientY);
+            } else {
+                tg.HapticFeedback.notificationOccurred('error');
             }
-        };
+        });
+
+        function createPlusOne(x, y) {
+            const el = document.createElement('div');
+            el.className = 'plus-one';
+            el.innerText = '+1';
+            el.style.left = `${x - 10}px`;
+            el.style.top = `${y - 40}px`;
+            document.body.appendChild(el);
+
+            setTimeout(() => el.remove(), 800);
+        }
+
+        function updateEnergyUI() {
+            const percent = (energy / maxEnergy) * 100;
+            energyFill.style.width = `${percent}%`;
+            energyCountEl.innerText = energy;
+        }
+
+        function saveData() {
+            localStorage.setItem('coins', count);
+            localStorage.setItem('energy', energy);
+        }
+
+        // Відновлення енергії (1 одиниця кожні 1.5 секунди)
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy++;
+                updateEnergyUI();
+                saveData();
+            }
+        }, 1500);
     </script>
 </body>
 </html>
