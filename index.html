@@ -2,238 +2,202 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LumisCoin Alpha</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LumisCoin Pro | Ultimate Edition</title>
     <style>
         :root {
-            --binance-gold: #f3ba2f;
-            --klyn-green: #00ff88;
-            --bg-dark: #0b0e11;
-            --card-bg: rgba(255, 255, 255, 0.07);
+            --gold: #f3ba2f; --bg: #0b0e11; --card: rgba(255,255,255,0.08); --gray: #848e9c; --green: #00ff88;
         }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; user-select: none; }
+        
+        /* HEADER */
+        .top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #181a20; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .wallet-info { background: var(--card); padding: 8px 12px; border-radius: 12px; border: 1px solid var(--gold); color: var(--gold); font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+        .mining-speed { color: var(--green); font-size: 0.75rem; margin-top: 4px; }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-dark);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+        /* SCREENS */
+        .page { display: none; position: absolute; inset: 0; background: var(--bg); padding: 20px; padding-bottom: 100px; overflow-y: auto; z-index: 50; }
+        .page.active { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* MAIN TAPPER */
+        .main-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
+        .balance-container h1 { font-size: 4rem; margin: 0; color: var(--gold); font-weight: 800; text-shadow: 0 0 20px rgba(243,186,47,0.2); }
+        .coin-btn {
+            width: 250px; height: 250px; background: radial-gradient(circle, #f3ba2f 0%, #b88a00 100%);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 7rem; cursor: pointer; position: relative;
+            box-shadow: 0 0 50px rgba(243, 186, 47, 0.4); border: 8px solid rgba(255,255,255,0.1);
+            transition: transform 0.05s ease; margin: 30px 0;
         }
+        .coin-btn:active { transform: scale(0.95); }
 
-        /* Головний екран */
-        #game-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-        }
+        /* CARDS (Quests & Farms) */
+        .item-card { background: var(--card); padding: 16px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .item-info h4 { margin: 0; font-size: 1.1rem; color: white; }
+        .item-info p { margin: 4px 0; font-size: 0.85rem; color: var(--gray); }
+        .price { color: var(--gold); font-weight: bold; }
 
-        .balance-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 20px 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        .btn-action { background: var(--gold); color: #000; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .btn-action:disabled { background: #444; color: #888; }
 
-        .balance-card h2 {
-            margin: 0;
-            font-size: 0.9rem;
-            color: #aaa;
-            text-transform: uppercase;
-        }
-
-        #balance {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--binance-gold);
-            text-shadow: 0 0 15px rgba(243, 186, 47, 0.3);
-        }
-
-        /* Велика Кнопка */
-        .main-tap-area {
-            width: 220px;
-            height: 220px;
-            background: radial-gradient(circle, #f3ba2f 0%, #d4a017 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5rem;
-            cursor: pointer;
-            box-shadow: 0 0 50px rgba(243, 186, 47, 0.4);
-            transition: transform 0.1s;
-            user-select: none;
-            border: 8px solid rgba(255,255,255,0.1);
-        }
-
-        .main-tap-area:active {
-            transform: scale(0.92);
-        }
-
-        /* Секції (Завдання, Ферми і т.д.) */
-        .page-content {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: calc(100% - 70px);
-            background: var(--bg-dark);
-            overflow-y: auto;
-            padding: 20px;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-
-        .active-page { display: block; animation: slideUp 0.3s ease-out; }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        /* Картки Завдань */
-        .quest-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 4px solid var(--binance-gold);
-        }
-
-        .quest-info h3 { margin: 0; font-size: 1rem; color: var(--binance-gold); }
-        .quest-info p { margin: 5px 0; font-size: 0.8rem; color: #ccc; }
-        .reward-badge { color: var(--klyn-green); font-weight: bold; font-size: 0.9rem; }
-
-        .btn-action {
-            background: var(--binance-gold);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* Навігація */
-        .nav-bar {
-            height: 70px;
-            background: rgba(11, 14, 17, 0.95);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            z-index: 20;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.7rem;
-            color: #888;
-            cursor: pointer;
-        }
-
-        .nav-item.active { color: var(--binance-gold); }
-        .nav-item span { font-size: 1.4rem; margin-bottom: 4px; }
+        /* NAVBAR */
+        .nav { height: 85px; background: #181a20; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); position: fixed; bottom: 0; width: 100%; z-index: 100; }
+        .nav-link { display: flex; flex-direction: column; align-items: center; color: var(--gray); font-size: 0.75rem; cursor: pointer; }
+        .nav-link.active { color: var(--gold); }
+        .nav-link span { font-size: 1.6rem; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div class="balance-card">
-            <h2>Твій баланс</h2>
-            <div id="balance">1000</div>
-            <div style="font-size: 0.8rem; color: var(--klyn-green);">KLYN Tokens</div>
+<div class="top-bar">
+    <div>
+        <div style="font-size: 0.9rem; font-weight: bold;">💎 Player Account</div>
+        <div class="mining-speed">⚡ Майнінг: +<span id="mps-val">0</span>/год</div>
+    </div>
+    <div class="wallet-info" onclick="alert('Гаманець буде доступний у версії Beta!')">👛 Wallet</div>
+</div>
+
+<div id="screen-main" class="page active">
+    <div class="main-screen">
+        <div class="balance-container" style="text-align: center;">
+            <h1 id="user-balance">0</h1>
+            <span style="color: var(--gray); letter-spacing: 2px;">LUMISCOIN</span>
         </div>
-        
-        <div class="main-tap-area" onclick="tapMe()">🟡</div>
-        <p style="margin-top: 20px; color: #666;">Тайпай, щоб заробляти</p>
+        <div class="coin-btn" id="tap-btn">🟡</div>
     </div>
+</div>
 
-    <div id="quests-page" class="page-content">
-        <h1 style="text-align: center;">Завдання</h1>
-        
-        <div class="quest-card">
-            <div class="quest-info">
-                <h3>Приєднатися до Telegram</h3>
-                <p>Будь у курсі всіх новин проекту</p>
-                <div class="reward-badge">+2000 KLYN</div>
-            </div>
-            <button class="btn-action" onclick="window.open('https://t.me/ТВОЯ_ГРУПА', '_blank')">Йти</button>
+<div id="screen-quests" class="page">
+    <h2 style="margin-bottom: 20px;">Завдання</h2>
+    <div class="item-card">
+        <div class="item-info">
+            <h4>Telegram Community</h4>
+            <p>Новини та AirDrops</p>
+            <span style="color: var(--green);">+5,000 KLYN</span>
         </div>
-
-        <div id="dynamic-quests"></div>
+        <button class="btn-action" onclick="window.open('https://t.me/your_link', '_blank')">Join</button>
     </div>
+    <div id="dynamic-quests"></div>
+</div>
 
-    <div class="nav-bar">
-        <div class="nav-item active" onclick="showPage('main')"><span>🏠</span>Головна</div>
-        <div class="nav-item" onclick="showPage('quests')"><span>📜</span>Завдання</div>
-        <div class="nav-item" onclick="alert('Скоро!')"><span>🚜</span>Ферми</div>
-        <div class="nav-item" onclick="alert('Твоє посилання: ...')"><span>👥</span>Друзі</div>
-    </div>
+<div id="screen-farms" class="page">
+    <h2 style="margin-bottom: 20px;">Майнінг Цехи</h2>
+    <div id="dynamic-farms"></div>
+</div>
 
-    <script>
-        let balance = 1000;
+<nav class="nav">
+    <div class="nav-link active" onclick="switchTab('screen-main', this)"><span>🏠</span>Головна</div>
+    <div class="nav-link" onclick="switchTab('screen-quests', this)"><span>📋</span>Завдання</div>
+    <div class="nav-link" onclick="switchTab('screen-farms', this)"><span>⚡</span>Ферми</div>
+    <div class="nav-link" onclick="alert('Рефералка в дорозі!')"><span>👥</span>Друзі</div>
+</nav>
 
-        function tapMe() {
-            balance += 1;
-            document.getElementById('balance').innerText = balance;
+<script>
+    // --- ДАНІ ТА ЗБЕРЕЖЕННЯ ---
+    let balance = parseFloat(localStorage.getItem('lumis_bal')) || 0;
+    let mps = parseFloat(localStorage.getItem('lumis_mps')) || 0; // Майнінг на секунду
+    let lastTap = 0;
+
+    // --- МАЙНІНГ ЛОГІКА (Щосекунди) ---
+    setInterval(() => {
+        if (mps > 0) {
+            balance += (mps / 3600); // Додаємо частину годинного доходу щосекунди
+            updateUI();
         }
+    }, 1000);
 
-        function showPage(page) {
-            // Приховуємо всі сторінки
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
+    function updateUI() {
+        document.getElementById('user-balance').innerText = Math.floor(balance).toLocaleString();
+        document.getElementById('mps-val').innerText = Math.floor(mps).toLocaleString();
+        localStorage.setItem('lumis_bal', balance);
+        localStorage.setItem('lumis_mps', mps);
+    }
+
+    // --- ТАПАЛКА ---
+    document.getElementById('tap-btn').addEventListener('pointerdown', (e) => {
+        const now = Date.now();
+        if (now - lastTap < 40) return; // Анти-клікер (40мс)
+        
+        balance += 1;
+        lastTap = now;
+        updateUI();
+        createPlusOne(e.clientX, e.clientY);
+    });
+
+    function createPlusOne(x, y) {
+        const p = document.createElement('div');
+        p.innerText = '+1';
+        p.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:var(--gold); font-weight:800; pointer-events:none; animation: fly 0.6s linear forwards; z-index:200;`;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 600);
+    }
+
+    // --- НАВІГАЦІЯ ТА JSON ---
+    function switchTab(id, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+        if (id !== 'screen-main') loadFromJSON();
+    }
+
+    async function loadFromJSON() {
+        try {
+            const res = await fetch('data.json');
+            const data = await res.json();
             
-            if (page === 'quests') {
-                document.getElementById('quests-page').classList.add('active-page');
-                loadQuests(); // Завантажуємо дані з JSON при відкритті
-            }
-        }
-
-        async function loadQuests() {
-            const container = document.getElementById('dynamic-quests');
-            container.innerHTML = '<p style="text-align:center">Завантаження партнерських програм...</p>';
-
-            try {
-                // Міняємо на пряме посилання на твій файл на GitHub
-                const response = await fetch('data.json'); 
-                const data = await response.json();
-                
-                container.innerHTML = ''; // Очищуємо текст завантаження
-
-                data.quests.forEach(q => {
-                    const card = document.createElement('div');
-                    card.className = 'quest-card';
-                    card.innerHTML = `
-                        <div class="quest-info">
-                            <h3>${q.title}</h3>
+            // Квести
+            const qContainer = document.getElementById('dynamic-quests');
+            qContainer.innerHTML = '';
+            data.quests.forEach(q => {
+                qContainer.innerHTML += `
+                    <div class="item-card">
+                        <div class="item-info">
+                            <h4>${q.title}</h4>
                             <p>${q.description}</p>
-                            <div class="reward-badge">+${q.reward} KLYN</div>
+                            <span style="color:var(--green)">+${q.reward.toLocaleString()} KLYN</span>
                         </div>
-                        <button class="btn-action" onclick="window.open('${q.link}', '_blank')">${q.button_text}</button>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (e) {
-                container.innerHTML = '<p style="color:red">Помилка завантаження партнерських завдань.</p>';
-            }
+                        <button class="btn-action" onclick="window.open('${q.link}', '_blank')">GO</button>
+                    </div>`;
+            });
+
+            // Ферми
+            const fContainer = document.getElementById('dynamic-farms');
+            fContainer.innerHTML = '';
+            data.mining_farms.forEach(f => {
+                const canBuy = balance >= f.cost;
+                fContainer.innerHTML += `
+                    <div class="item-card">
+                        <div class="item-info">
+                            <h4>${f.icon} ${f.name}</h4>
+                            <p>Дохід: +${f.income_per_hour}/год</p>
+                            <span class="price">Ціна: ${f.cost.toLocaleString()} Lumis</span>
+                        </div>
+                        <button class="btn-action" ${canBuy ? '' : 'disabled'} onclick="buyFarm(${f.cost}, ${f.income_per_hour})">
+                            ${canBuy ? 'Купити' : 'Недостатньо'}
+                        </button>
+                    </div>`;
+            });
+        } catch (e) { console.error("JSON Error", e); }
+    }
+
+    function buyFarm(cost, income) {
+        if (balance >= cost) {
+            balance -= cost;
+            mps += income;
+            updateUI();
+            alert("Цех придбано! Потужність зросла.");
+            loadFromJSON(); // Оновити кнопки
         }
-    </script>
+    }
+
+    // Анімація для +1
+    const s = document.createElement('style');
+    s.innerHTML = `@keyframes fly { 0%{transform:translateY(0); opacity:1;} 100%{transform:translateY(-100px); opacity:0;} }`;
+    document.head.appendChild(s);
+    updateUI();
+</script>
+
 </body>
 </html>
-
