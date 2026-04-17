@@ -2,179 +2,241 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AI Clicker Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FireBot - Mining Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #0f0f0f;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0e0e0e;
             color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Контейнер для вкладок */
+        .page {
+            display: none;
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .active {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-            user-select: none;
-            touch-action: manipulation;
         }
 
-        .score-container {
-            font-size: 56px;
-            font-weight: 900;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(0, 136, 204, 0.5);
+        /* Шапка з балансом */
+        .header {
+            padding: 20px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0e0e0e 100%);
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        .coin-wrapper {
-            position: relative;
+        .balance-container {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        .mining-rate {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Кнопка головна (якщо захочеш клікати) */
+        .main-btn {
+            background: radial-gradient(circle, #ff5e00 0%, #ff2a00 100%);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 40px auto;
             display: flex;
-            justify-content: center;
             align-items: center;
-        }
-
-        #coin {
-            width: 280px;
-            height: 280px;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 94, 0, 0.4);
             cursor: pointer;
-            transition: transform 0.05s ease;
-            filter: drop-shadow(0 0 15px #0088cc);
+            transition: transform 0.1s;
         }
 
-        #coin:active {
+        .main-btn:active {
             transform: scale(0.95);
         }
 
-        /* Анімація вилітаючої цифри */
-        .plus-one {
-            position: absolute;
-            color: #0088cc;
-            font-size: 24px;
+        /* Навігація внизу */
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            background-color: #1a1a1a;
+            padding: 10px 0;
+            border-top: 1px solid #333;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            color: #888;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active-nav {
+            color: #ffcc00;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        /* Список завдань та магазину */
+        .list-item {
+            background: #1a1a1a;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .btn-buy {
+            background: #ffcc00;
+            color: black;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
             font-weight: bold;
-            pointer-events: none;
-            animation: moveUp 0.8s ease-out forwards;
-        }
-
-        @keyframes moveUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-150px); opacity: 0; }
-        }
-
-        /* Енергія */
-        .energy-container {
-            width: 80%;
-            max-width: 300px;
-            margin-top: 40px;
-        }
-
-        .energy-bar {
-            width: 100%;
-            height: 12px;
-            background: #333;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        #energy-fill {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #0088cc, #00ffcc);
-            transition: width 0.1s;
-        }
-
-        .energy-text {
-            margin-top: 8px;
-            font-size: 16px;
-            color: #aaa;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="score-container" id="balance">0</div>
-    
-    <div class="coin-wrapper" id="click-area">
-        <img id="coin" src="https://cdn-icons-png.flaticon.com/512/2091/2091665.png" alt="Click!">
+    <div class="header">
+        <div class="balance-container" id="balance">0</div>
+        <div class="mining-rate">Дохід: +<span id="rate">1</span>/сек</div>
     </div>
 
-    <div class="energy-container">
-        <div class="energy-bar">
-            <div id="energy-fill"></div>
+    <div id="mining" class="page active">
+        <h2>Майнінг</h2>
+        <div class="main-btn" onclick="manualClick()">
+            <span style="font-size: 60px;">🔥</span>
         </div>
-        <div class="energy-text">⚡ <span id="energy-count">1000</span> / 1000</div>
+        <p>Пасивний майнінг працює...</p>
+    </div>
+
+    <div id="tasks" class="page">
+        <h2>Завдання</h2>
+        <div class="list-item">
+            <span>Підписатися на канал</span>
+            <button class="btn-buy" onclick="completeTask(100)">+100</button>
+        </div>
+    </div>
+
+    <div id="leaderboard" class="page">
+        <h2>Таблиця лідерів</h2>
+        <p>Скоро тут будуть найкращі гравці!</p>
+    </div>
+
+    <div id="shop" class="page">
+        <h2>Магазин</h2>
+        <div class="list-item">
+            <div>
+                <strong>Швидкість х2</strong><br>
+                <small>Ціна: 500</small>
+            </div>
+            <button class="btn-buy" onclick="buyUpgrade(500, 1)">Купити</button>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active-nav" onclick="showPage('mining', this)">
+            <span class="nav-icon">⛏️</span>
+            <span>Майнінг</span>
+        </div>
+        <div class="nav-item" onclick="showPage('tasks', this)">
+            <span class="nav-icon">📋</span>
+            <span>Завдання</span>
+        </div>
+        <div class="nav-item" onclick="showPage('leaderboard', this)">
+            <span class="nav-icon">🏆</span>
+            <span>Лідерборд</span>
+        </div>
+        <div class="nav-item" onclick="showPage('shop', this)">
+            <span class="nav-icon">🛒</span>
+            <span>Магазин</span>
+        </div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        const balanceEl = document.getElementById('balance');
-        const coin = document.getElementById('coin');
-        const clickArea = document.getElementById('click-area');
-        const energyFill = document.getElementById('energy-fill');
-        const energyCountEl = document.getElementById('energy-count');
+        let balance = 0;
+        let rate = 1; // Монет за секунду
 
-        tg.expand();
-
-        let count = parseInt(localStorage.getItem('coins')) || 0;
-        let energy = parseInt(localStorage.getItem('energy')) || 1000;
-        const maxEnergy = 1000;
-
-        balanceEl.innerText = count.toLocaleString();
-        updateEnergyUI();
-
-        // Функція кліку
-        clickArea.addEventListener('touchstart', (e) => {
-            if (energy > 0) {
-                // Логіка монет
-                count++;
-                energy--;
-                
-                balanceEl.innerText = count.toLocaleString();
-                updateEnergyUI();
-                saveData();
-
-                // Вібрація
-                tg.HapticFeedback.impactOccurred('medium');
-
-                // Створення +1 у місці дотику
-                const touch = e.touches[0];
-                createPlusOne(touch.clientX, touch.clientY);
-            } else {
-                tg.HapticFeedback.notificationOccurred('error');
-            }
-        });
-
-        function createPlusOne(x, y) {
-            const el = document.createElement('div');
-            el.className = 'plus-one';
-            el.innerText = '+1';
-            el.style.left = `${x - 10}px`;
-            el.style.top = `${y - 40}px`;
-            document.body.appendChild(el);
-
-            setTimeout(() => el.remove(), 800);
+        // Функція перемикання сторінок
+        function showPage(pageId, navEl) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            
+            document.getElementById(pageId).classList.add('active');
+            navEl.classList.add('active-nav');
         }
 
-        function updateEnergyUI() {
-            const percent = (energy / maxEnergy) * 100;
-            energyFill.style.width = `${percent}%`;
-            energyCountEl.innerText = energy;
+        // Ручний клік (якщо хочеш залишити)
+        function manualClick() {
+            balance += 1;
+            updateDisplay();
         }
 
-        function saveData() {
-            localStorage.setItem('coins', count);
-            localStorage.setItem('energy', energy);
-        }
-
-        // Відновлення енергії (1 одиниця кожні 1.5 секунди)
+        // Пасивний дохід (працює кожну секунду)
         setInterval(() => {
-            if (energy < maxEnergy) {
-                energy++;
-                updateEnergyUI();
-                saveData();
+            balance += rate;
+            updateDisplay();
+        }, 1000);
+
+        // Оновлення тексту на екрані
+        function updateDisplay() {
+            document.getElementById('balance').innerText = Math.floor(balance);
+            document.getElementById('rate').innerText = rate;
+        }
+
+        // Покупка апгрейду
+        function buyUpgrade(cost, addRate) {
+            if (balance >= cost) {
+                balance -= cost;
+                rate += addRate;
+                updateDisplay();
+                alert("Покращення куплено!");
+            } else {
+                alert("Недостатньо монет!");
             }
-        }, 1500);
+        }
+
+        // Виконання завдань
+        function completeTask(reward) {
+            balance += reward;
+            updateDisplay();
+            alert("Нагорода отримана!");
+        }
+
+        // Повідомляємо Telegram, що програму запущено
+        const tg = window.Telegram.WebApp;
+        tg.expand();
     </script>
 </body>
 </html>
+
