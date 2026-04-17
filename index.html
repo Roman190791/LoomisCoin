@@ -3,35 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis: The Hybrid Hero</title>
+    <title>Lumis: Awakening</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --neon-blue: #00f2ff;
             --ai-purple: #bc00ff;
             --klyn-gold: #ffcc00;
+            --cyber-dark: #020202;
         }
-        body { font-family: 'Courier New', monospace; background-color: #050505; color: white; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { font-family: 'Courier New', monospace; background-color: var(--cyber-dark); color: white; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        .header { padding: 15px; background: rgba(20, 20, 20, 0.9); border-bottom: 2px solid var(--neon-blue); text-align: center; }
+        .header { padding: 15px; background: rgba(0, 0, 0, 0.9); border-bottom: 2px solid var(--neon-blue); text-align: center; }
         .balance-main { font-size: 26px; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
-        .balance-sub { font-size: 16px; color: var(--klyn-gold); margin-top: 5px; letter-spacing: 2px; }
+        .balance-sub { font-size: 16px; color: var(--klyn-gold); margin-top: 5px; letter-spacing: 1px; }
         
-        .page { display: none; flex: 1; padding: 20px; text-align: center; overflow-y: auto; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
+        .page { display: none; flex: 1; padding: 20px; text-align: center; overflow-y: auto; background: radial-gradient(circle at center, #111 0%, #020202 100%); }
         .active { display: flex; flex-direction: column; align-items: center; }
 
-        /* Центр Синхронізації */
+        /* Камера Інкубації з твоїм зображенням */
         .sync-sphere {
-            width: 200px; height: 200px; border-radius: 50%;
-            background: rgba(0, 0, 0, 0.5);
-            border: 4px double var(--neon-blue);
+            width: 250px; height: 250px; border-radius: 50%;
+            border: 4px solid #333;
             margin: 30px auto; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2), inset 0 0 20px var(--ai-purple);
-            position: relative; cursor: pointer;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1), inset 0 0 20px rgba(188, 0, 255, 0.2);
+            position: relative; cursor: pointer; transition: transform 0.1s;
+            overflow: hidden;
         }
-        .sync-sphere::after {
-            content: "SYNC"; color: var(--neon-blue); font-size: 12px; position: absolute; bottom: 20px;
+        .sync-sphere:active { transform: scale(0.95); }
+        
+        /* ТВОЄ ЗОБРАЖЕННЯ ГЕРОЯ */
+        #lumis-avatar {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: all 0.5s ease;
+            filter: drop-shadow(0 0 10px var(--neon-blue));
         }
+
+        /* Бінарний код, що з'являється при кліку */
+        .code-overlay {
+            position: absolute; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--neon-blue);
+            font-size: 10px; text-align: left; overflow: hidden;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .sync-sphere:active .code-overlay { opacity: 1; }
 
         .nav-bar { display: flex; background: #000; padding: 12px 0; border-top: 1px solid #333; }
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: #555; cursor: pointer; text-transform: uppercase; }
@@ -54,34 +72,37 @@
     <div id="mining" class="page active">
         <div class="lore-text">Люміс: протокол злиття активовано...</div>
         <div class="sync-sphere" onclick="clickMine()">
-            <img src="https://img.icons8.com/ios/100/ffffff/artificial-intelligence.png" style="width: 80px; filter: drop-shadow(0 0 10px var(--neon-blue));">
+            <img src="lumis_hero.png" id="lumis-avatar"> <div class="code-overlay">
+                01011001 01010101 01010011<br>
+                01010011 01011001 01010101<br>
+                01010011 01011001 01010101<br>
+                ...activating sync...<br>
+            </div>
         </div>
-        <p style="color: var(--ai-purple);">Синхронізація свідомості: +<span id="rate">1</span>/s</p>
+        <p style="color: var(--ai-purple);">Синхронізація: +<span id="rate">1</span>/s</p>
         <button class="btn" style="width: 100%; max-width: 300px; margin-top: 20px; border-color: var(--klyn-gold); color: var(--klyn-gold);" onclick="exchangeCurrency()">
-            КОНВЕРТУВАТИ ЕНЕРГІЮ В LUMIS
+            КОНВЕРТУВАТИ ЕНЕРГІЮ В LUMIS (1000 KLYN)
         </button>
     </div>
 
     <div id="shop" class="page">
-        <h2 style="color: var(--neon-blue);">Еволюція Люміса</h2>
+        <h2 style="color: var(--neon-blue);">Модулі Еволюції</h2>
         <div class="card">
-            <div><strong>Нейронний Міст</strong><br><small>+1 до швидкості</small></div>
+            <div><strong>Нейронний Міст v1</strong><br><small>+1 до швидкості</small></div>
             <button class="btn" onclick="buyUpgrade(0.5, 1)">0.50 L</button>
         </div>
         <div class="card">
-            <div><strong>Ядро ШІ "Оракул"</strong><br><small>+5 до швидкості</small></div>
+            <div><strong>Ядро "Оракул"</strong><br><small>+5 до швидкості</small></div>
             <button class="btn" onclick="buyUpgrade(2.0, 5)">2.00 L</button>
         </div>
     </div>
 
-    <div id="tasks" class="page"><h2>Досьє героя</h2><p>Досліджуйте світ Люміса через завдання...</p></div>
-    <div id="leaderboard" class="page"><h2>Глобальна Мережа</h2><p>Найстабільніші гібриди:</p></div>
+    <div id="tasks" class="page"><h2>Досьє героя</h2><p>Досліджуйте світ Люміса...</p></div>
 
     <div class="nav-bar">
-        <div class="nav-item active-nav" onclick="showPage('mining', this)">Синхро</div>
-        <div class="nav-item" onclick="showPage('shop', this)">Еволюція</div>
-        <div class="nav-item" onclick="showPage('tasks', this)">Завдання</div>
-        <div class="nav-item" onclick="showPage('leaderboard', this)">Мережа</div>
+        <div class="nav-item active-nav" onclick="showPage('mining', this)">ІНКУБАЦІЯ</div>
+        <div class="nav-item" onclick="showPage('shop', this)">ЕВОЛЮЦІЯ</div>
+        <div class="nav-item" onclick="showPage('tasks', this)">МЕРЕЖА</div>
     </div>
 
     <script>
@@ -96,7 +117,7 @@
             if (secondsAway > 15) { 
                 let earned = secondsAway * rate;
                 klyn += earned;
-                alert("Поки ви були в офлайні, Люміс продовжував збір даних. Отримано " + earned + " KLYN енергії.");
+                alert("Поки ви були в офлайні, Люміс накопичив: " + earned + " KLYN енергії.");
             }
         }
 
@@ -121,7 +142,7 @@
                 lumis += 0.10;
                 updateUI();
             } else {
-                alert("Системі потрібно мінімум 1000 KLYN для стабільного синтезу!");
+                alert("Системі потрібно мінімум 1000 KLYN!");
             }
         }
 
@@ -131,7 +152,7 @@
                 rate += addRate;
                 updateUI();
             } else {
-                alert("Недостатньо LUMISCOIN для еволюції!");
+                alert("Недостатньо LUMISCOIN!");
             }
         }
 
