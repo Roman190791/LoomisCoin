@@ -3,214 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis Cyber-Dragon | Prototype</title>
+    <title>Lumis Cyber-Dragon Full</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap');
-        :root { --gold: #f3ba2f; --neon: #00f2ff; --bg: #0b0e11; --card: rgba(255, 255, 255, 0.05); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
+        :root { --gold: #f3ba2f; --neon: #00f2ff; --bg: #0b0e11; --card: rgba(255, 255, 255, 0.05); --green: #00ff88; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        body { background: var(--bg); color: white; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
 
-        /* Верхня панель */
-        .top-panel { height: 75px; background: #181a20; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; position: relative; z-index: 100; }
-        .stat-val { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; }
+        /* HEADER */
+        .header { height: 70px; background: #181a20; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
+        .stat-box { display: flex; flex-direction: column; }
         .stat-label { font-size: 0.5rem; color: #888; text-transform: uppercase; }
+        .stat-val { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; }
 
-        .screen { display: none; position: absolute; inset: 75px 0 85px 0; padding: 15px; overflow-y: auto; }
+        .container { position: absolute; inset: 70px 0 85px 0; overflow-y: auto; padding: 15px; }
+        .screen { display: none; }
         .active-screen { display: block; }
 
-        /* Генератор та Енергія */
-        .gen-area { text-align: center; margin: 15px 0; position: relative; }
+        /* FACTORY CORE (НОВЕ) */
         .cyber-box { 
-            width: 130px; height: 130px; margin: 0 auto; background: radial-gradient(circle, var(--gold) 0%, transparent 75%);
-            border: 2px solid var(--gold); border-radius: 25px; display: flex; align-items: center; justify-content: center;
-            font-size: 4rem; cursor: pointer; transition: 0.1s; box-shadow: 0 0 20px rgba(243,186,47,0.1);
+            width: 120px; height: 120px; margin: 10px auto; background: radial-gradient(circle, var(--gold) 0%, transparent 75%);
+            border: 2px solid var(--gold); border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 3.5rem; cursor: pointer; transition: 0.1s;
         }
-        .cyber-box:active { transform: scale(0.92); }
-        .energy-bar-bg { width: 140px; height: 6px; background: #222; margin: 10px auto; border-radius: 3px; overflow: hidden; border: 1px solid var(--neon); }
-        .energy-fill { height: 100%; background: var(--neon); width: 100%; transition: 0.3s; box-shadow: 0 0 10px var(--neon); }
+        .cyber-box:active { transform: scale(0.95); }
+        .en-bar { width: 150px; height: 6px; background: #222; margin: 8px auto; border-radius: 3px; border: 1px solid var(--neon); overflow: hidden; }
+        .en-fill { height: 100%; background: var(--neon); width: 100%; transition: 0.3s; }
 
-        /* Сітка 4х4 */
-        .factory-grid { 
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px; 
-            background: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid #333; 
-        }
-        .slot { 
-            aspect-ratio: 1; background: #181a20; border: 1px solid #2a2d33; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; position: relative; font-size: 1.8rem;
-        }
-        .slot.occupied { border-color: var(--gold); background: rgba(243,186,47,0.02); }
+        .factory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 15px; }
+        .slot { aspect-ratio: 1; background: #181a20; border: 1px solid #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 1.5rem; }
+        .slot.occupied { border-color: var(--gold); }
         .slot.selected { border-color: var(--neon); background: rgba(0,242,255,0.05); }
-        .lvl-tag { position: absolute; bottom: 4px; right: 4px; font-size: 0.55rem; color: var(--gold); background: #000; padding: 1px 4px; border-radius: 4px; font-weight: bold; }
+        .lvl-badge { position: absolute; bottom: 2px; right: 2px; font-size: 0.5rem; color: var(--gold); background: #000; padding: 1px 3px; border-radius: 3px; }
 
-        /* Магазин */
-        .shop-item { background: var(--card); border: 1px solid #333; padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .buy-btn { background: var(--gold); color: black; border: none; padding: 10px 15px; border-radius: 8px; font-family: 'Orbitron'; font-weight: bold; font-size: 0.7rem; }
-        .buy-btn:disabled { opacity: 0.2; }
+        /* LISTS (TASKS, NODES, FRIENDS) */
+        .item-card { background: var(--card); border: 1px solid #333; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-action { background: var(--gold); color: black; border: none; padding: 8px 12px; border-radius: 6px; font-family: 'Orbitron'; font-weight: bold; font-size: 0.7rem; }
+        .btn-action:disabled { opacity: 0.3; }
 
-        /* Навігація */
+        /* FOOTER NAV */
         .nav { height: 85px; background: #181a20; position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--gold); }
-        .nav-btn { text-align: center; color: #555; font-size: 0.6rem; cursor: pointer; }
-        .nav-btn.active { color: var(--gold); }
-        .nav-btn i { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+        .nav-item { text-align: center; color: #555; font-size: 0.55rem; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="top-panel">
-        <div>
-            <div class="stat-label">Production Speed</div>
-            <div id="hp-display" class="stat-val">⚡ 0.00000 H/H</div>
+    <div class="header">
+        <div class="stat-box">
+            <span class="stat-label">Power</span>
+            <span id="hp-val" class="stat-val">⚡ 0.00</span>
         </div>
-        <div style="text-align:right">
-            <div class="stat-label">Lumis Vault</div>
-            <div id="lumis-display" class="stat-val">0.00000</div>
+        <div class="stat-box" style="text-align:right">
+            <span class="stat-label">Lumis Vault</span>
+            <span id="bal-val" class="stat-val">0.000</span>
         </div>
     </div>
 
-    <div id="scr-factory" class="screen active-screen">
-        <div class="gen-area">
-            <div class="cyber-box" onclick="spawnFromBox()">📦</div>
-            <div class="energy-bar-bg"><div id="en-fill" class="energy-fill"></div></div>
-            <div id="en-text" style="font-size:0.6rem; color:#888;">ENERGY: 100/100</div>
+    <div class="container">
+        <div id="scr-factory" class="screen active-screen">
+            <div style="text-align:center">
+                <div class="cyber-box" onclick="spawnUnit()">📦</div>
+                <div class="en-bar"><div id="en-fill" class="en-fill"></div></div>
+                <div id="en-text" style="font-size:0.6rem; color:#888;">ENERGY: 100/100</div>
+            </div>
+            <div class="factory-grid" id="grid"></div>
         </div>
-        <div class="factory-grid" id="main-grid"></div>
-        <div style="text-align:center; margin-top:15px; font-size:0.5rem; color:#444; letter-spacing:1px;">MERGE UNITS TO UNLOCK HIGHER LEVELS</div>
-    </div>
 
-    <div id="scr-market" class="screen">
-        <h3 style="color:var(--neon); font-family:'Orbitron'; font-size:0.8rem; margin-bottom:15px;">CYBER MARKET (L1-L5)</h3>
-        <div id="market-container"></div>
-    </div>
+        <div id="scr-tasks" class="screen">
+            <h3 style="margin-bottom:15px; color:var(--neon); font-size:0.9rem;">DAILY MISSIONS</h3>
+            <div class="item-card">
+                <div><b>Twitter Follow</b><br><small>+50.00 LC</small></div>
+                <button class="btn-action" onclick="doTask(50)">START</button>
+            </div>
+            <div class="item-card">
+                <div><b>Daily Check-in</b><br><small>+10.00 LC</small></div>
+                <button class="btn-action" onclick="doTask(10)">CLAIM</button>
+            </div>
+        </div>
 
-    <div id="scr-nodes" class="screen">
-        <h3 style="color:var(--neon); font-family:'Orbitron'; font-size:0.8rem; margin-bottom:15px;">HARDWARE NODES</h3>
-        <div id="nodes-container"></div>
+        <div id="scr-nodes" class="screen">
+            <h3 style="margin-bottom:15px; color:var(--neon); font-size:0.9rem;">MINING HARDWARE</h3>
+            <div id="nodes-list"></div>
+        </div>
+
+        <div id="scr-friends" class="screen">
+            <h3 style="margin-bottom:15px; color:var(--neon); font-size:0.9rem;">REFERRAL SYSTEM</h3>
+            <div class="item-card" style="flex-direction:column; align-items:flex-start;">
+                <small style="color:#888">Your Link:</small>
+                <code style="background:#000; padding:5px; width:100%; font-size:0.7rem;">https://t.me/lumis_bot?start=12345</code>
+            </div>
+            <p style="font-size:0.7rem; color:#666; text-align:center">Invite friends and get 10% of their earnings!</p>
+        </div>
+
+        <div id="scr-wallet" class="screen">
+            <h3 style="margin-bottom:15px; color:var(--neon); font-size:0.9rem;">CRYPTO WALLET</h3>
+            <div style="background:var(--card); padding:20px; border-radius:15px; text-align:center;">
+                <div style="font-size:0.7rem; color:#888;">AVAILABLE BALANCE</div>
+                <div id="wallet-bal" style="font-size:1.8rem; color:var(--gold); font-family:'Orbitron';">0.000</div>
+                <button class="btn-action" style="width:100%; margin-top:15px; padding:15px;">CONNECT TON</button>
+            </div>
+        </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-btn active" onclick="tab('scr-factory', this)"><i>⚙️</i>FACTORY</div>
-        <div class="nav-btn" onclick="tab('scr-market', this)"><i>🛒</i>MARKET</div>
-        <div class="nav-btn" onclick="tab('scr-nodes', this)"><i>⚡</i>NODES</div>
+        <div class="nav-item active" onclick="nav('scr-factory', this)"><i>⚙️</i>FACTORY</div>
+        <div class="nav-item" onclick="nav('scr-tasks', this)"><i>📋</i>TASKS</div>
+        <div class="nav-item" onclick="nav('scr-nodes', this)"><i>⚡</i>NODES</div>
+        <div class="nav-item" onclick="nav('scr-friends', this)"><i>👥</i>FRIENDS</div>
+        <div class="nav-item" onclick="nav('scr-wallet', this)"><i>👛</i>WALLET</div>
     </nav>
 
     <script>
-        // Конфігурація іконок
-        const icons = ["🔌", "🤖", "🦾", "🛡️", "🚀", "🛰️", "⚡", "💠", "⚛️", "🧬", "🔮", "🌌", "🧠", "🔥", "💎", "👑"];
-        
+        const icons = ["🔌", "🤖", "🦾", "🛡️", "🚀", "🛰️", "⚡", "💠", "⚛️", "🧬", "🔮", "🌌"];
         let state = {
             lumis: parseFloat(localStorage.getItem('L_BAL')) || 0.1,
             hp: 0,
             energy: 100,
             grid: JSON.parse(localStorage.getItem('L_GRID')) || Array(16).fill(null),
-            marketData: []
+            nodeIncome: parseFloat(localStorage.getItem('L_NODE')) || 0
         };
 
-        let selectedIdx = null;
-
-        // Завантаження JSON
-        async function initData() {
-            try {
-                const res = await fetch('data.json');
-                const data = await res.json();
-                state.marketData = data.cyber_market;
-                renderMarket();
-                renderNodes(data.hardware_nodes);
-            } catch(e) { console.log("JSON not loaded, using defaults"); }
-        }
+        let selected = null;
 
         function updateUI() {
-            document.getElementById('lumis-display').innerText = state.lumis.toFixed(5);
-            document.getElementById('hp-display').innerText = `⚡ ${state.hp.toFixed(5)} H/H`;
+            document.getElementById('bal-val').innerText = state.lumis.toFixed(3);
+            document.getElementById('wallet-bal').innerText = state.lumis.toFixed(3);
+            document.getElementById('hp-val').innerText = `⚡ ${state.hp.toFixed(2)}`;
             document.getElementById('en-fill').style.width = state.energy + '%';
             document.getElementById('en-text').innerText = `ENERGY: ${Math.floor(state.energy)}/100`;
-            
             localStorage.setItem('L_BAL', state.lumis);
             localStorage.setItem('L_GRID', JSON.stringify(state.grid));
+            localStorage.setItem('L_NODE', state.nodeIncome);
         }
 
-        function spawnFromBox() {
+        function spawnUnit() {
             const free = state.grid.indexOf(null);
             if(state.energy >= 10 && free !== -1) {
-                state.energy -= 10;
-                state.grid[free] = 1;
-                recalculate(); renderGrid(); updateUI();
+                state.energy -= 10; state.grid[free] = 1;
+                recalc(); renderGrid(); updateUI();
             }
         }
 
         function renderGrid() {
-            const grid = document.getElementById('main-grid');
-            grid.innerHTML = '';
+            const g = document.getElementById('grid'); g.innerHTML = '';
             state.grid.forEach((lvl, i) => {
-                const cell = document.createElement('div');
-                cell.className = `slot ${lvl ? 'occupied' : ''} ${selectedIdx === i ? 'selected' : ''}`;
-                cell.onclick = () => handleMerge(i);
-                if(lvl) cell.innerHTML = `${icons[(lvl-1)%icons.length]} <span class="lvl-tag">L${lvl}</span>`;
-                grid.appendChild(cell);
+                const s = document.createElement('div');
+                s.className = `slot ${lvl?'occupied':''} ${selected===i?'selected':''}`;
+                s.onclick = () => {
+                    if(selected===null) { if(state.grid[i]) selected=i; }
+                    else {
+                        if(i!==selected && state.grid[i]===state.grid[selected] && state.grid[i]) {
+                            state.grid[i]++; state.grid[selected]=null; selected=null;
+                        } else { selected=state.grid[i]?i:null; }
+                    }
+                    recalc(); renderGrid(); updateUI();
+                };
+                if(lvl) s.innerHTML = `${icons[(lvl-1)%icons.length]}<span class="lvl-badge">L${lvl}</span>`;
+                g.appendChild(s);
             });
         }
 
-        function handleMerge(i) {
-            if(selectedIdx === null) {
-                if(state.grid[i]) selectedIdx = i;
-            } else {
-                if(i !== selectedIdx && state.grid[i] === state.grid[selectedIdx] && state.grid[i]) {
-                    state.grid[i]++;
-                    state.grid[selectedIdx] = null;
-                    selectedIdx = null;
-                    recalculate();
-                } else {
-                    selectedIdx = state.grid[i] ? i : null;
-                }
-            }
-            renderGrid(); updateUI();
+        async function loadNodes() {
+            const list = document.getElementById('nodes-list');
+            list.innerHTML = `
+                <div class="item-card">
+                    <div><b>Basic Miner</b><br><small>+0.50 HP/H</small></div>
+                    <button class="btn-action" onclick="buyNode(10, 0.5)">10.00 LC</button>
+                </div>
+                <div class="item-card">
+                    <div><b>GPU Cluster</b><br><small>+2.50 HP/H</small></div>
+                    <button class="btn-action" onclick="buyNode(50, 2.5)">50.00 LC</button>
+                </div>`;
         }
 
-        function renderMarket() {
-            const cont = document.getElementById('market-container');
-            cont.innerHTML = '';
-            state.marketData.forEach(item => {
-                cont.innerHTML += `
-                    <div class="shop-item">
-                        <div style="font-size:1.5rem;">${item.icon}</div>
-                        <div style="flex:1; margin-left:15px;"><b>${item.name}</b><br><small>+${item.income} H/H</small></div>
-                        <button class="buy-btn" onclick="buyUnit(${item.lvl}, ${item.cost})" ${state.lumis < item.cost ? 'disabled' : ''}>${item.cost} LC</button>
-                    </div>`;
-            });
-        }
-
-        function buyUnit(lvl, cost) {
-            const free = state.grid.indexOf(null);
-            if(state.lumis >= cost && free !== -1) {
-                state.lumis -= cost; state.grid[free] = lvl;
-                recalculate(); renderGrid(); renderMarket(); updateUI();
+        function buyNode(cost, inc) {
+            if(state.lumis >= cost) {
+                state.lumis -= cost; state.nodeIncome += inc; recalc(); updateUI();
             }
         }
 
-        function recalculate() {
-            let total = 0;
+        function doTask(reward) {
+            state.lumis += reward; alert(`Rewarded: +${reward} LC`); updateUI();
+        }
+
+        function recalc() {
+            let total = state.nodeIncome;
             state.grid.forEach(lvl => { if(lvl) total += 0.05 * Math.pow(2.2, lvl-1); });
             state.hp = total;
         }
 
-        function tab(id, el) {
+        function nav(id, el) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active-screen');
             el.classList.add('active');
-            if(id === 'scr-market') renderMarket();
+            if(id === 'scr-nodes') loadNodes();
         }
 
-        // Цикл нарахування
         setInterval(() => {
             if(state.hp > 0) state.lumis += (state.hp / 3600);
-            if(state.energy < 100) state.energy += 0.5;
+            if(state.energy < 100) state.energy += 0.4;
             updateUI();
         }, 1000);
 
-        initData();
-        recalculate();
-        renderGrid();
-        updateUI();
+        recalc(); renderGrid(); updateUI();
     </script>
 </body>
 </html>
