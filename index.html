@@ -1,227 +1,266 @@
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LumisCoin Pro | Official</title>
+    <title>Lumis Terminal | P2E Next-Gen</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap');
+
         :root {
-            --binance-gold: #f3ba2f;
-            --bg-dark: #0b0e11;
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --text-gray: #848e9c;
+            --gold: #f3ba2f;
+            --neon-blue: #00f2ff;
+            --bg: #0b0e11;
+            --card: rgba(255, 255, 255, 0.05);
             --green: #00ff88;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            margin: 0; background-color: var(--bg-dark); color: white;
-            font-family: 'Inter', sans-serif; display: flex; flex-direction: column;
-            height: 100vh; overflow: hidden; user-select: none;
+            margin: 0; background: var(--bg); color: white;
+            font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden;
         }
 
-        /* TOP BAR */
-        .top-bar {
-            padding: 15px 20px; display: flex; justify-content: space-between;
-            align-items: center; background: #181a20; border-bottom: 1px solid rgba(255,255,255,0.1);
+        /* BOOT SEQUENCE */
+        #boot-screen {
+            position: fixed; inset: 0; background: black; z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; padding: 30px;
+            color: var(--green); font-size: 0.8rem;
         }
-        .user-id-box { display: flex; flex-direction: column; }
-        .user-id-box span { font-size: 0.75rem; color: var(--text-gray); }
-        .user-id-box b { color: var(--binance-gold); font-size: 0.9rem; }
 
-        /* PAGES LOGIC */
-        .page {
-            display: none; position: absolute; inset: 0; top: 65px; bottom: 85px;
-            background: var(--bg-dark); padding: 20px; overflow-y: auto;
+        /* TOP PANEL */
+        .top-panel {
+            height: 70px; background: #181a20; border-bottom: 2px solid var(--gold);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .active { display: block; animation: fadeIn 0.2s; }
+        .user-block { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; background: var(--gold); border-radius: 8px; border: 2px solid var(--neon-blue); }
+        .hp-counter { color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem; }
 
-        /* MAIN SCREEN */
-        #main-page { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .balance-num { font-size: 4.5rem; font-weight: 900; color: var(--binance-gold); margin: 10px 0; }
-        .coin-btn {
-            width: 240px; height: 240px; background: radial-gradient(circle, #f3ba2f 0%, #b88a00 100%);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 7rem; box-shadow: 0 0 50px rgba(243, 186, 47, 0.4);
-            border: 8px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.05s;
+        /* SCREENS */
+        .screen {
+            display: none; position: absolute; inset: 70px 0 85px 0;
+            padding: 20px; overflow-y: auto; background: radial-gradient(circle at center, #161a1e 0%, #0b0e11 100%);
         }
-        .coin-btn:active { transform: scale(0.95); }
+        .active-screen { display: block; animation: scanline 0.2s linear; }
+
+        /* MAIN TERMINAL */
+        #scr-main { text-align: center; }
+        .balance-group { margin: 10px 0; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; background: rgba(0,0,0,0.2); }
+        .bal-val { font-family: 'Orbitron'; font-size: 2.2rem; color: var(--gold); }
+        .bal-label { font-size: 0.6rem; color: var(--text-gray); letter-spacing: 2px; }
+
+        .lumis-core {
+            width: 260px; height: 260px; margin: 30px auto;
+            position: relative; border-radius: 50%;
+            background: radial-gradient(circle, #f3ba2f 0%, #000 70%);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 50px rgba(243, 186, 47, 0.2);
+            cursor: pointer; transition: 0.05s;
+        }
+        .lumis-core:active { transform: scale(0.92) skewX(2deg); filter: hue-rotate(90deg); }
+        .lumis-core::after { content: 'L'; font-family: 'Orbitron'; font-size: 8rem; color: black; font-weight: 900; }
+
+        .energy-bar-wrap { width: 80%; height: 12px; background: #222; margin: 20px auto; border-radius: 6px; border: 1px solid var(--neon-blue); overflow: hidden; }
+        #energy-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--neon-blue), #0066ff); transition: 0.3s; }
 
         /* CARDS */
-        .card {
-            background: var(--card-bg); border-radius: 18px; padding: 16px;
-            margin-bottom: 12px; display: flex; justify-content: space-between;
-            align-items: center; border: 1px solid rgba(255,255,255,0.05);
+        .cyber-card {
+            background: var(--card); border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px; border-radius: 14px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(5px);
         }
-        .card-info h4 { margin: 0; font-size: 1rem; }
-        .card-info p { margin: 4px 0; font-size: 0.8rem; color: var(--text-gray); }
-        .reward { color: var(--green); font-weight: bold; }
-
-        .btn-go {
-            background: var(--binance-gold); color: black; border: none;
-            padding: 10px 18px; border-radius: 12px; font-weight: bold; cursor: pointer;
+        .reward-pill { color: var(--green); font-size: 0.8rem; font-weight: bold; }
+        .btn-cyber {
+            background: var(--gold); color: black; border: none; padding: 10px 18px;
+            border-radius: 8px; font-family: 'Orbitron'; font-weight: bold; cursor: pointer;
         }
-
-        /* WALLET SPECIFIC */
-        .wallet-stats { background: var(--card-bg); padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 20px; }
-        .usdt-val { font-size: 1.5rem; color: var(--green); font-weight: bold; }
 
         /* NAVIGATION */
         .nav {
-            height: 85px; background: #181a20; display: flex;
-            justify-content: space-around; align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.1); position: fixed; bottom: 0; width: 100%;
+            height: 85px; background: #181a20; position: fixed; bottom: 0; width: 100%;
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 1px solid var(--gold);
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-gray); font-size: 0.7rem; cursor: pointer; }
-        .nav-item.active-nav { color: var(--binance-gold); }
-        .nav-item i { font-size: 1.6rem; margin-bottom: 4px; }
+        .nav-item { text-align: center; color: #555; font-size: 0.6rem; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item i { font-size: 1.8rem; display: block; margin-bottom: 5px; }
 
-        @keyframes fly { 0%{transform:translateY(0); opacity:1;} 100%{transform:translateY(-120px); opacity:0;} }
-        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+        @keyframes scanline { from { filter: brightness(2) contrast(1.5); } to { filter: brightness(1) contrast(1); } }
+        .floating-text { position: fixed; pointer-events: none; color: var(--gold); font-weight: bold; animation: fly 0.7s forwards; }
+        @keyframes fly { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="user-id-box">
-            <span>ID: <b id="display-id">482910</b></span>
-            <span id="mining-info">⚡ Майнінг: 0 / год</span>
+    <div id="boot-screen"></div>
+
+    <div class="top-panel">
+        <div class="user-block">
+            <div class="avatar"></div>
+            <div>
+                <div style="font-size: 0.7rem;">OPERATOR #482910</div>
+                <div class="hp-counter" id="hp-display">⚡ 0 HP/H</div>
+            </div>
         </div>
-        <div style="color: var(--binance-gold); font-weight: bold;">LUMIS PRO</div>
+        <div onclick="nav('scr-wallet', this)" style="cursor:pointer">
+            <div style="font-size: 0.5rem; text-align:right">MAIN VAULT</div>
+            <div id="top-bal" style="color:var(--gold); font-family:'Orbitron'">0</div>
+        </div>
     </div>
 
-    <div id="page-main" class="page active">
-        <div style="color: var(--text-gray); letter-spacing: 2px;">БАЛАНС</div>
-        <div class="balance-num" id="balance">0</div>
-        <div class="coin-btn" id="tap-btn">🟡</div>
+    <div id="scr-main" class="screen active-screen">
+        <div class="balance-group">
+            <div class="bal-label">KLYN (CLEAN)</div>
+            <div class="bal-val" id="klyn-bal">0</div>
+        </div>
+        <div class="lumis-core" id="tap-target"></div>
+        <div class="bal-label">ENERGY RESERVE</div>
+        <div class="energy-bar-wrap"><div id="energy-fill"></div></div>
+        <div id="energy-text" style="font-size: 0.8rem;">1000 / 1000</div>
     </div>
 
-    <div id="page-quests" class="page">
-        <h3>Завдання & Бонуси</h3>
-        
-        <div class="card">
-            <div class="card-info">
-                <h4>Binance: Бонус USDC</h4>
-                <p>Отримай реальні USDC за реєстрацію</p>
-                <span class="reward">+15,000 KLYN</span>
-            </div>
-            <button class="btn-go" onclick="window.open('https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?ref=GRO_28502_8WOY9', '_blank')">GO</button>
-        </div>
-
-        <div class="card">
-            <div class="card-info">
-                <h4>Binance Square Alpha</h4>
-                <p>Підпишись на автора (прогноз ринку)</p>
-                <span class="reward">+7,500 KLYN</span>
-            </div>
-            <button class="btn-go" onclick="window.open('https://app.binance.com/uni-qr/cpro/Square-Creator-4e1ecbf95832?ref=FME4Z3RN', '_blank')">Follow</button>
-        </div>
-
-        <div class="card">
-            <div class="card-info">
-                <h4>Telegram: Головний Канал</h4>
-                <p>Всі новини проекту тут</p>
-                <span class="reward">+5,000 KLYN</span>
-            </div>
-            <button class="btn-go" onclick="window.open('https://t.me/your_main_link', '_blank')">Join</button>
-        </div>
-        
-        <div id="json-quests-box"></div> </div>
-
-    <div id="page-farms" class="page">
-        <h3>Майнінг Ферми</h3>
-        <div id="farms-list"></div>
+    <div id="scr-earn" class="screen">
+        <h3 style="color:var(--neon-blue); font-family:'Orbitron'">DATA LINKS</h3>
+        <div id="links-container"></div>
     </div>
 
-    <div id="page-wallet" class="page">
-        <h3>Мій Гаманець</h3>
-        <div class="wallet-stats">
-            <p>Ваш капітал у перерахунку:</p>
-            <div class="usdt-val" id="usdt-balance">0.00 USDT</div>
-            <p style="font-size: 0.8rem; color: var(--text-gray);">Курс: 100,000 Lumis = 10 USDT</p>
+    <div id="scr-nodes" class="screen">
+        <h3 style="color:var(--neon-blue); font-family:'Orbitron'">MINING NODES</h3>
+        <div id="farms-container"></div>
+    </div>
+
+    <div id="scr-wallet" class="screen">
+        <h3 style="color:var(--neon-blue); font-family:'Orbitron'">VAULT STATUS</h3>
+        <div class="balance-group" style="border-color: var(--gold)">
+            <div class="bal-label">LUMISCOIN BALANCE</div>
+            <div class="bal-val" id="lumis-bal">0</div>
+            <div style="font-size: 0.7rem; color: var(--green); margin-top: 10px;">Status: Pre-Listing Phase</div>
         </div>
-        <button class="btn-go" style="width: 100%; padding: 15px;" onclick="alert('Виведення буде доступне після лістингу!')">ВИВЕСТИ КОШТИ</button>
+        <p style="font-size: 0.7rem; color: #888;">* Конвертація KLYN у LUMIS буде доступна після оновлення ядра системи.</p>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active-nav" onclick="showPage('page-main', this)"><i>🏠</i>Головна</div>
-        <div class="nav-item" onclick="showPage('page-quests', this)"><i>📋</i>Завдання</div>
-        <div class="nav-item" onclick="showPage('page-farms', this)"><i>⚡</i>Ферми</div>
-        <div class="nav-item" onclick="showPage('page-wallet', this)"><i>👛</i>Гаманець</div>
+        <div class="nav-item active" onclick="nav('scr-main', this)"><i>🏠</i>CORE</div>
+        <div class="nav-item" onclick="nav('scr-earn', this)"><i>📡</i>LINKS</div>
+        <div class="nav-item" onclick="nav('scr-nodes', this)"><i>⚡</i>NODES</div>
+        <div class="nav-item" onclick="nav('scr-wallet', this)"><i>👛</i>VAULT</div>
     </nav>
 
     <script>
-        let balance = parseFloat(localStorage.getItem('L_BAL')) || 0;
-        let mps = parseFloat(localStorage.getItem('L_MPS')) || 0;
+        let state = {
+            klyn: parseFloat(localStorage.getItem('L_KLYN')) || 0,
+            lumis: parseFloat(localStorage.getItem('L_LUMIS')) || 0,
+            hp: parseFloat(localStorage.getItem('L_HP')) || 0,
+            en: parseFloat(localStorage.getItem('L_EN')) || 1000,
+            maxEn: 1000
+        };
 
-        function updateUI() {
-            document.getElementById('balance').innerText = Math.floor(balance).toLocaleString();
-            document.getElementById('mining-info').innerText = `⚡ Майнінг: ${Math.floor(mps)} / год`;
-            document.getElementById('usdt-balance').innerText = ((balance / 100000) * 10).toFixed(2) + " USDT";
-            
-            localStorage.setItem('L_BAL', balance);
-            localStorage.setItem('L_MPS', mps);
-        }
+        const bootTexts = [
+            "INITIALIZING LUMIS KERNEL...",
+            "CONNECTING TO BINANCE NODES...",
+            "ESTABLISHING KUCOIN DATA LINK...",
+            "ENCRYPTION: AES-256 ACTIVE",
+            "OPERATOR AUTHORIZED.",
+            "WELCOME TO THE FUTURE."
+        ];
 
-        // ТАП
-        document.getElementById('tap-btn').addEventListener('pointerdown', (e) => {
-            balance += 1;
-            updateUI();
-            const p = document.createElement('div');
-            p.innerText = '+1';
-            p.style.cssText = `position:fixed; left:${e.clientX}px; top:${e.clientY}px; color:var(--binance-gold); font-weight:900; pointer-events:none; animation: fly 0.6s forwards;`;
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 600);
+        // BOOT ANIMATION
+        const boot = document.getElementById('boot-screen');
+        bootTexts.forEach((t, i) => {
+            setTimeout(() => {
+                boot.innerHTML += `<p>> ${t}</p>`;
+                if(i === bootTexts.length - 1) setTimeout(() => boot.style.display = 'none', 1000);
+            }, i * 400);
         });
 
-        // НАВІГАЦІЯ
-        function showPage(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
-            document.getElementById(id).classList.add('active');
-            el.classList.add('active-nav');
-            if(id === 'page-farms' || id === 'page-quests') loadData();
+        function updateUI() {
+            document.getElementById('klyn-bal').innerText = Math.floor(state.klyn).toLocaleString();
+            document.getElementById('lumis-bal').innerText = Math.floor(state.lumis).toLocaleString();
+            document.getElementById('top-bal').innerText = Math.floor(state.lumis).toLocaleString();
+            document.getElementById('hp-display').innerText = `⚡ ${state.hp.toFixed(1)} HP/H`;
+            document.getElementById('energy-fill').style.width = (state.en / state.maxEn * 100) + '%';
+            document.getElementById('energy-text').innerText = `${Math.floor(state.en)} / ${state.maxEn}`;
+            
+            localStorage.setItem('L_KLYN', state.klyn);
+            localStorage.setItem('L_LUMIS', state.lumis);
+            localStorage.setItem('L_HP', state.hp);
+            localStorage.setItem('L_EN', state.en);
+        }
+
+        // TAP
+        document.getElementById('tap-target').addEventListener('pointerdown', (e) => {
+            if(state.en >= 1) {
+                state.klyn += 1;
+                state.en -= 1;
+                updateUI();
+                pop(e.clientX, e.clientY);
+            }
+        });
+
+        function pop(x, y) {
+            const p = document.createElement('div');
+            p.className = 'floating-text';
+            p.innerText = '+1 KLYN';
+            p.style.left = x + 'px'; p.style.top = y + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 700);
+        }
+
+        // NAV
+        function nav(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active-screen');
+            el.classList.add('active');
+            if(id === 'scr-earn' || id === 'scr-nodes') loadData();
         }
 
         async function loadData() {
-            try {
-                const res = await fetch('data.json');
-                const data = await res.json();
-                
-                // Рендер ферм
-                const fList = document.getElementById('farms-list');
-                fList.innerHTML = '';
-                data.mining_farms.forEach(f => {
-                    const canBuy = balance >= f.cost;
-                    fList.innerHTML += `
-                        <div class="card">
-                            <div class="card-info">
-                                <h4>${f.icon} ${f.name}</h4>
-                                <p>Дохід: +${f.income_per_hour}/год</p>
-                                <span class="reward">Ціна: ${f.cost.toLocaleString()} Lumis</span>
-                            </div>
-                            <button class="btn-go" ${canBuy ? '' : 'disabled style="background:#444"'} onclick="buyFarm(${f.cost}, ${f.income_per_hour})">
-                                ${canBuy ? 'Купити' : 'Мало'}
-                            </button>
-                        </div>`;
-                });
-            } catch(e) { console.log("JSON Error"); }
+            const res = await fetch('data.json');
+            const d = await res.json();
+            
+            // Links
+            const lCont = document.getElementById('links-container');
+            lCont.innerHTML = '';
+            d.links.forEach(l => {
+                lCont.innerHTML += `
+                    <div class="cyber-card">
+                        <div><b>${l.icon} ${l.name}</b><br><span class="reward-pill">+${l.reward} KLYN</span></div>
+                        <button class="btn-cyber" onclick="window.open('${l.url}', '_blank')">LINK</button>
+                    </div>`;
+            });
+
+            // Nodes
+            const fCont = document.getElementById('farms-container');
+            fCont.innerHTML = '';
+            d.farms.forEach(f => {
+                const canBuy = state.lumis >= f.cost;
+                fCont.innerHTML += `
+                    <div class="cyber-card">
+                        <div><b>${f.icon} ${f.name}</b><br><span style="color:var(--neon-blue)">+${f.income} HP/H</span></div>
+                        <button class="btn-cyber" ${canBuy ? '' : 'disabled style="opacity:0.3"'} onclick="buyNode(${f.cost}, ${f.income})">${f.cost}</button>
+                    </div>`;
+            });
         }
 
-        function buyFarm(cost, inc) {
-            if(balance >= cost) {
-                balance -= cost;
-                mps += inc;
+        function buyNode(c, i) {
+            if(state.lumis >= c) {
+                state.lumis -= c;
+                state.hp += i;
                 updateUI();
                 loadData();
             }
         }
 
-        // ПАСИВНИЙ ДОХІД
+        // AUTO MINING & ENERGY REGEN
         setInterval(() => {
-            if(mps > 0) {
-                balance += (mps / 3600);
-                updateUI();
-            }
+            if(state.hp > 0) state.lumis += (state.hp / 3600);
+            if(state.en < state.maxEn) state.en += 1.5; // Реген енергії
+            updateUI();
         }, 1000);
 
         updateUI();
