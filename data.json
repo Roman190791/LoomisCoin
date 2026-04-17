@@ -1,60 +1,21 @@
 {
-  "game_config": {
-    "currency_name": "LumisCoin",
-    "secondary_currency": "KLYN",
-    "conversion_rate_usdt": 0.0001
-  },
-  "mining_farms": [
-    {
-      "id": "farm_1",
-      "name": "Starter Node",
-      "description": "Базовий рівень видобутку",
-      "cost": 500,
-      "income_per_hour": 15,
-      "icon": "⚡"
-    },
-    {
-      "id": "farm_2",
-      "name": "GPU Cluster",
-      "description": "Потужна відеокарта для майнінгу",
-      "cost": 5000,
-      "income_per_hour": 180,
-      "icon": "💎"
-    },
-    {
-      "id": "farm_3",
-      "name": "Server Station",
-      "description": "Професійне обладнання",
-      "cost": 25000,
-      "income_per_hour": 1200,
-      "icon": "🖥️"
-    }
+  "project_name": "Lumis Terminal Pro",
+  "version": "1.0.4-Cyber",
+  "links": [
+    {"id": "binance", "name": "Binance: USDC Bonus", "url": "https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?ref=GRO_28502_8WOY9", "reward": 15000, "icon": "🔶"},
+    {"id": "kucoin", "name": "KuCoin: Partner Reward", "url": "https://link.kucoin.com/iqEP/alk9lpk6?rcode=QBA35T4H", "reward": 12000, "icon": "💎"},
+    {"id": "yt_labs", "name": "YT: AI Community Labs", "url": "https://www.youtube.com/@aicommunitylabs", "reward": 8000, "icon": "🎬"},
+    {"id": "yt_grom", "name": "YT: Grom-o4u9s", "url": "https://www.youtube.com/@Grom-o4u9s", "reward": 8000, "icon": "🎬"},
+    {"id": "tg_labs", "name": "TG: AI Community Labs", "url": "https://t.me/aicommunitylabs", "reward": 5000, "icon": "📡"},
+    {"id": "tg_project", "name": "TG: AI Project 231", "url": "https://t.me/aiproject231", "reward": 5000, "icon": "🛰️"},
+    {"id": "tg_loomis", "name": "TG: Loomis45", "url": "https://t.me/Loomis45", "reward": 4000, "icon": "🪐"},
+    {"id": "tg_motivation", "name": "TG: Motivate UA", "url": "https://t.me/motivateyoua", "reward": 4000, "icon": "🔥"}
   ],
-  "quests": [
-    {
-      "id": "tg_main",
-      "title": "Основний Telegram",
-      "description": "Приєднуйся до нашої бази",
-      "reward": 5000,
-      "link": "https://t.me/your_main_channel",
-      "button_text": "Join"
-    },
-    {
-      "id": "tg_news",
-      "title": "Новини Крипти",
-      "description": "Будь у курсі всіх рухів",
-      "reward": 3000,
-      "link": "https://t.me/your_news_channel",
-      "button_text": "Join"
-    },
-    {
-      "id": "binance_reg",
-      "title": "Binance Бонус USDC",
-      "description": "Реєстрація за партнерським лінком",
-      "reward": 15000,
-      "link": "https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?ref=GRO_28502_8WOY9",
-      "button_text": "Claim"
-    }
+  "farms": [
+    {"id": "node_1", "name": "Basic Node", "cost": 1000, "income": 50, "icon": "🔌"},
+    {"id": "node_2", "name": "GPU Cluster", "cost": 10000, "income": 650, "icon": "💻"},
+    {"id": "node_3", "name": "Quantum Mainframe", "cost": 100000, "income": 8000, "icon": "🌌"}
   ]
 }
+
 
