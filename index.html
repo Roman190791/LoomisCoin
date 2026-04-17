@@ -3,201 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LumisCoin Pro | Ultimate Edition</title>
+    <title>LumisCoin Pro | Official</title>
     <style>
         :root {
-            --gold: #f3ba2f; --bg: #0b0e11; --card: rgba(255,255,255,0.08); --gray: #848e9c; --green: #00ff88;
+            --binance-gold: #f3ba2f;
+            --bg-dark: #0b0e11;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --text-gray: #848e9c;
+            --green: #00ff88;
         }
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; user-select: none; }
-        
-        /* HEADER */
-        .top-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #181a20; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .wallet-info { background: var(--card); padding: 8px 12px; border-radius: 12px; border: 1px solid var(--gold); color: var(--gold); font-size: 0.8rem; font-weight: bold; cursor: pointer; }
-        .mining-speed { color: var(--green); font-size: 0.75rem; margin-top: 4px; }
 
-        /* SCREENS */
-        .page { display: none; position: absolute; inset: 0; background: var(--bg); padding: 20px; padding-bottom: 100px; overflow-y: auto; z-index: 50; }
-        .page.active { display: block; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        body {
+            margin: 0; background-color: var(--bg-dark); color: white;
+            font-family: 'Inter', sans-serif; display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden; user-select: none;
+        }
 
-        /* MAIN TAPPER */
-        .main-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
-        .balance-container h1 { font-size: 4rem; margin: 0; color: var(--gold); font-weight: 800; text-shadow: 0 0 20px rgba(243,186,47,0.2); }
+        /* TOP BAR */
+        .top-bar {
+            padding: 15px 20px; display: flex; justify-content: space-between;
+            align-items: center; background: #181a20; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .user-id-box { display: flex; flex-direction: column; }
+        .user-id-box span { font-size: 0.75rem; color: var(--text-gray); }
+        .user-id-box b { color: var(--binance-gold); font-size: 0.9rem; }
+
+        /* PAGES LOGIC */
+        .page {
+            display: none; position: absolute; inset: 0; top: 65px; bottom: 85px;
+            background: var(--bg-dark); padding: 20px; overflow-y: auto;
+        }
+        .active { display: block; animation: fadeIn 0.2s; }
+
+        /* MAIN SCREEN */
+        #main-page { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .balance-num { font-size: 4.5rem; font-weight: 900; color: var(--binance-gold); margin: 10px 0; }
         .coin-btn {
-            width: 250px; height: 250px; background: radial-gradient(circle, #f3ba2f 0%, #b88a00 100%);
+            width: 240px; height: 240px; background: radial-gradient(circle, #f3ba2f 0%, #b88a00 100%);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 7rem; cursor: pointer; position: relative;
-            box-shadow: 0 0 50px rgba(243, 186, 47, 0.4); border: 8px solid rgba(255,255,255,0.1);
-            transition: transform 0.05s ease; margin: 30px 0;
+            font-size: 7rem; box-shadow: 0 0 50px rgba(243, 186, 47, 0.4);
+            border: 8px solid rgba(255,255,255,0.1); cursor: pointer; transition: transform 0.05s;
         }
         .coin-btn:active { transform: scale(0.95); }
 
-        /* CARDS (Quests & Farms) */
-        .item-card { background: var(--card); padding: 16px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
-        .item-info h4 { margin: 0; font-size: 1.1rem; color: white; }
-        .item-info p { margin: 4px 0; font-size: 0.85rem; color: var(--gray); }
-        .price { color: var(--gold); font-weight: bold; }
+        /* CARDS */
+        .card {
+            background: var(--card-bg); border-radius: 18px; padding: 16px;
+            margin-bottom: 12px; display: flex; justify-content: space-between;
+            align-items: center; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .card-info h4 { margin: 0; font-size: 1rem; }
+        .card-info p { margin: 4px 0; font-size: 0.8rem; color: var(--text-gray); }
+        .reward { color: var(--green); font-weight: bold; }
 
-        .btn-action { background: var(--gold); color: #000; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; }
-        .btn-action:disabled { background: #444; color: #888; }
+        .btn-go {
+            background: var(--binance-gold); color: black; border: none;
+            padding: 10px 18px; border-radius: 12px; font-weight: bold; cursor: pointer;
+        }
 
-        /* NAVBAR */
-        .nav { height: 85px; background: #181a20; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); position: fixed; bottom: 0; width: 100%; z-index: 100; }
-        .nav-link { display: flex; flex-direction: column; align-items: center; color: var(--gray); font-size: 0.75rem; cursor: pointer; }
-        .nav-link.active { color: var(--gold); }
-        .nav-link span { font-size: 1.6rem; margin-bottom: 5px; }
+        /* WALLET SPECIFIC */
+        .wallet-stats { background: var(--card-bg); padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 20px; }
+        .usdt-val { font-size: 1.5rem; color: var(--green); font-weight: bold; }
+
+        /* NAVIGATION */
+        .nav {
+            height: 85px; background: #181a20; display: flex;
+            justify-content: space-around; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1); position: fixed; bottom: 0; width: 100%;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-gray); font-size: 0.7rem; cursor: pointer; }
+        .nav-item.active-nav { color: var(--binance-gold); }
+        .nav-item i { font-size: 1.6rem; margin-bottom: 4px; }
+
+        @keyframes fly { 0%{transform:translateY(0); opacity:1;} 100%{transform:translateY(-120px); opacity:0;} }
+        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
     </style>
 </head>
 <body>
 
-<div class="top-bar">
-    <div>
-        <div style="font-size: 0.9rem; font-weight: bold;">💎 Player Account</div>
-        <div class="mining-speed">⚡ Майнінг: +<span id="mps-val">0</span>/год</div>
-    </div>
-    <div class="wallet-info" onclick="alert('Гаманець буде доступний у версії Beta!')">👛 Wallet</div>
-</div>
-
-<div id="screen-main" class="page active">
-    <div class="main-screen">
-        <div class="balance-container" style="text-align: center;">
-            <h1 id="user-balance">0</h1>
-            <span style="color: var(--gray); letter-spacing: 2px;">LUMISCOIN</span>
+    <div class="top-bar">
+        <div class="user-id-box">
+            <span>ID: <b id="display-id">482910</b></span>
+            <span id="mining-info">⚡ Майнінг: 0 / год</span>
         </div>
+        <div style="color: var(--binance-gold); font-weight: bold;">LUMIS PRO</div>
+    </div>
+
+    <div id="page-main" class="page active">
+        <div style="color: var(--text-gray); letter-spacing: 2px;">БАЛАНС</div>
+        <div class="balance-num" id="balance">0</div>
         <div class="coin-btn" id="tap-btn">🟡</div>
     </div>
-</div>
 
-<div id="screen-quests" class="page">
-    <h2 style="margin-bottom: 20px;">Завдання</h2>
-    <div class="item-card">
-        <div class="item-info">
-            <h4>Telegram Community</h4>
-            <p>Новини та AirDrops</p>
-            <span style="color: var(--green);">+5,000 KLYN</span>
-        </div>
-        <button class="btn-action" onclick="window.open('https://t.me/your_link', '_blank')">Join</button>
-    </div>
-    <div id="dynamic-quests"></div>
-</div>
-
-<div id="screen-farms" class="page">
-    <h2 style="margin-bottom: 20px;">Майнінг Цехи</h2>
-    <div id="dynamic-farms"></div>
-</div>
-
-<nav class="nav">
-    <div class="nav-link active" onclick="switchTab('screen-main', this)"><span>🏠</span>Головна</div>
-    <div class="nav-link" onclick="switchTab('screen-quests', this)"><span>📋</span>Завдання</div>
-    <div class="nav-link" onclick="switchTab('screen-farms', this)"><span>⚡</span>Ферми</div>
-    <div class="nav-link" onclick="alert('Рефералка в дорозі!')"><span>👥</span>Друзі</div>
-</nav>
-
-<script>
-    // --- ДАНІ ТА ЗБЕРЕЖЕННЯ ---
-    let balance = parseFloat(localStorage.getItem('lumis_bal')) || 0;
-    let mps = parseFloat(localStorage.getItem('lumis_mps')) || 0; // Майнінг на секунду
-    let lastTap = 0;
-
-    // --- МАЙНІНГ ЛОГІКА (Щосекунди) ---
-    setInterval(() => {
-        if (mps > 0) {
-            balance += (mps / 3600); // Додаємо частину годинного доходу щосекунди
-            updateUI();
-        }
-    }, 1000);
-
-    function updateUI() {
-        document.getElementById('user-balance').innerText = Math.floor(balance).toLocaleString();
-        document.getElementById('mps-val').innerText = Math.floor(mps).toLocaleString();
-        localStorage.setItem('lumis_bal', balance);
-        localStorage.setItem('lumis_mps', mps);
-    }
-
-    // --- ТАПАЛКА ---
-    document.getElementById('tap-btn').addEventListener('pointerdown', (e) => {
-        const now = Date.now();
-        if (now - lastTap < 40) return; // Анти-клікер (40мс)
+    <div id="page-quests" class="page">
+        <h3>Завдання & Бонуси</h3>
         
-        balance += 1;
-        lastTap = now;
-        updateUI();
-        createPlusOne(e.clientX, e.clientY);
-    });
+        <div class="card">
+            <div class="card-info">
+                <h4>Binance: Бонус USDC</h4>
+                <p>Отримай реальні USDC за реєстрацію</p>
+                <span class="reward">+15,000 KLYN</span>
+            </div>
+            <button class="btn-go" onclick="window.open('https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?ref=GRO_28502_8WOY9', '_blank')">GO</button>
+        </div>
 
-    function createPlusOne(x, y) {
-        const p = document.createElement('div');
-        p.innerText = '+1';
-        p.style.cssText = `position:fixed; left:${x}px; top:${y}px; color:var(--gold); font-weight:800; pointer-events:none; animation: fly 0.6s linear forwards; z-index:200;`;
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 600);
-    }
+        <div class="card">
+            <div class="card-info">
+                <h4>Binance Square Alpha</h4>
+                <p>Підпишись на автора (прогноз ринку)</p>
+                <span class="reward">+7,500 KLYN</span>
+            </div>
+            <button class="btn-go" onclick="window.open('https://app.binance.com/uni-qr/cpro/Square-Creator-4e1ecbf95832?ref=FME4Z3RN', '_blank')">Follow</button>
+        </div>
 
-    // --- НАВІГАЦІЯ ТА JSON ---
-    function switchTab(id, el) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
-        if (id !== 'screen-main') loadFromJSON();
-    }
+        <div class="card">
+            <div class="card-info">
+                <h4>Telegram: Головний Канал</h4>
+                <p>Всі новини проекту тут</p>
+                <span class="reward">+5,000 KLYN</span>
+            </div>
+            <button class="btn-go" onclick="window.open('https://t.me/your_main_link', '_blank')">Join</button>
+        </div>
+        
+        <div id="json-quests-box"></div> </div>
 
-    async function loadFromJSON() {
-        try {
-            const res = await fetch('data.json');
-            const data = await res.json();
+    <div id="page-farms" class="page">
+        <h3>Майнінг Ферми</h3>
+        <div id="farms-list"></div>
+    </div>
+
+    <div id="page-wallet" class="page">
+        <h3>Мій Гаманець</h3>
+        <div class="wallet-stats">
+            <p>Ваш капітал у перерахунку:</p>
+            <div class="usdt-val" id="usdt-balance">0.00 USDT</div>
+            <p style="font-size: 0.8rem; color: var(--text-gray);">Курс: 100,000 Lumis = 10 USDT</p>
+        </div>
+        <button class="btn-go" style="width: 100%; padding: 15px;" onclick="alert('Виведення буде доступне після лістингу!')">ВИВЕСТИ КОШТИ</button>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-item active-nav" onclick="showPage('page-main', this)"><i>🏠</i>Головна</div>
+        <div class="nav-item" onclick="showPage('page-quests', this)"><i>📋</i>Завдання</div>
+        <div class="nav-item" onclick="showPage('page-farms', this)"><i>⚡</i>Ферми</div>
+        <div class="nav-item" onclick="showPage('page-wallet', this)"><i>👛</i>Гаманець</div>
+    </nav>
+
+    <script>
+        let balance = parseFloat(localStorage.getItem('L_BAL')) || 0;
+        let mps = parseFloat(localStorage.getItem('L_MPS')) || 0;
+
+        function updateUI() {
+            document.getElementById('balance').innerText = Math.floor(balance).toLocaleString();
+            document.getElementById('mining-info').innerText = `⚡ Майнінг: ${Math.floor(mps)} / год`;
+            document.getElementById('usdt-balance').innerText = ((balance / 100000) * 10).toFixed(2) + " USDT";
             
-            // Квести
-            const qContainer = document.getElementById('dynamic-quests');
-            qContainer.innerHTML = '';
-            data.quests.forEach(q => {
-                qContainer.innerHTML += `
-                    <div class="item-card">
-                        <div class="item-info">
-                            <h4>${q.title}</h4>
-                            <p>${q.description}</p>
-                            <span style="color:var(--green)">+${q.reward.toLocaleString()} KLYN</span>
-                        </div>
-                        <button class="btn-action" onclick="window.open('${q.link}', '_blank')">GO</button>
-                    </div>`;
-            });
-
-            // Ферми
-            const fContainer = document.getElementById('dynamic-farms');
-            fContainer.innerHTML = '';
-            data.mining_farms.forEach(f => {
-                const canBuy = balance >= f.cost;
-                fContainer.innerHTML += `
-                    <div class="item-card">
-                        <div class="item-info">
-                            <h4>${f.icon} ${f.name}</h4>
-                            <p>Дохід: +${f.income_per_hour}/год</p>
-                            <span class="price">Ціна: ${f.cost.toLocaleString()} Lumis</span>
-                        </div>
-                        <button class="btn-action" ${canBuy ? '' : 'disabled'} onclick="buyFarm(${f.cost}, ${f.income_per_hour})">
-                            ${canBuy ? 'Купити' : 'Недостатньо'}
-                        </button>
-                    </div>`;
-            });
-        } catch (e) { console.error("JSON Error", e); }
-    }
-
-    function buyFarm(cost, income) {
-        if (balance >= cost) {
-            balance -= cost;
-            mps += income;
-            updateUI();
-            alert("Цех придбано! Потужність зросла.");
-            loadFromJSON(); // Оновити кнопки
+            localStorage.setItem('L_BAL', balance);
+            localStorage.setItem('L_MPS', mps);
         }
-    }
 
-    // Анімація для +1
-    const s = document.createElement('style');
-    s.innerHTML = `@keyframes fly { 0%{transform:translateY(0); opacity:1;} 100%{transform:translateY(-100px); opacity:0;} }`;
-    document.head.appendChild(s);
-    updateUI();
-</script>
+        // ТАП
+        document.getElementById('tap-btn').addEventListener('pointerdown', (e) => {
+            balance += 1;
+            updateUI();
+            const p = document.createElement('div');
+            p.innerText = '+1';
+            p.style.cssText = `position:fixed; left:${e.clientX}px; top:${e.clientY}px; color:var(--binance-gold); font-weight:900; pointer-events:none; animation: fly 0.6s forwards;`;
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 600);
+        });
 
+        // НАВІГАЦІЯ
+        function showPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active-nav');
+            if(id === 'page-farms' || id === 'page-quests') loadData();
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch('data.json');
+                const data = await res.json();
+                
+                // Рендер ферм
+                const fList = document.getElementById('farms-list');
+                fList.innerHTML = '';
+                data.mining_farms.forEach(f => {
+                    const canBuy = balance >= f.cost;
+                    fList.innerHTML += `
+                        <div class="card">
+                            <div class="card-info">
+                                <h4>${f.icon} ${f.name}</h4>
+                                <p>Дохід: +${f.income_per_hour}/год</p>
+                                <span class="reward">Ціна: ${f.cost.toLocaleString()} Lumis</span>
+                            </div>
+                            <button class="btn-go" ${canBuy ? '' : 'disabled style="background:#444"'} onclick="buyFarm(${f.cost}, ${f.income_per_hour})">
+                                ${canBuy ? 'Купити' : 'Мало'}
+                            </button>
+                        </div>`;
+                });
+            } catch(e) { console.log("JSON Error"); }
+        }
+
+        function buyFarm(cost, inc) {
+            if(balance >= cost) {
+                balance -= cost;
+                mps += inc;
+                updateUI();
+                loadData();
+            }
+        }
+
+        // ПАСИВНИЙ ДОХІД
+        setInterval(() => {
+            if(mps > 0) {
+                balance += (mps / 3600);
+                updateUI();
+            }
+        }, 1000);
+
+        updateUI();
+    </script>
 </body>
 </html>
