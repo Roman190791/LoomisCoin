@@ -1,44 +1,56 @@
 {
-  "farms": [
+  "game_config": {
+    "currency_name": "LumisCoin",
+    "secondary_currency": "KLYN",
+    "welcome_bonus": 1000,
+    "daily_bonus": 200,
+    "min_withdrawal_lumis": 100000,
+    "conversion_rate_usdt": 0.10
+  },
+  "mining_farms": [
     {
-      "name": "Нейронний Вузол",
-      "desc": "+1 KLYN/сек",
-      "price": 0.5,
-      "add": 1
+      "id": "farm_1",
+      "name": "Starter Node",
+      "description": "Початкова ферма для майнінгу",
+      "cost": 500,
+      "income_per_hour": 10,
+      "icon": "⚡"
     },
     {
-      "name": "Матриця Пам’яті",
-      "desc": "+10 KLYN/сек",
-      "price": 4.0,
-      "add": 10
-    },
-    {
-      "name": "ШІ Ядро Люміса",
-      "desc": "+50 KLYN/сек",
-      "price": 15.0,
-      "add": 50
+      "id": "farm_2",
+      "name": "GPU Cluster",
+      "description": "Потужний кластер для серйозного заробітку",
+      "cost": 5000,
+      "income_per_hour": 120,
+      "icon": "💎"
     }
   ],
-  "tasks": [
+  "quests": [
     {
-      "name": "AI Community Labs (TG)",
-      "reward": 300,
-      "url": "https://t.me/aicommunitylabs"
+      "id": "binance_bonus",
+      "title": "Binance: Отримай бонус USDC",
+      "description": "Забери свій вітальний бонус у USDC через офіційну реферальну програму Binance та отримай +15 000 KLYN у грі за активацію.",
+      "reward": 15000,
+      "link": "https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=uk-UA&ref=GRO_28502_8WOY9",
+      "type": "partner",
+      "button_text": "Активувати бонус USDC"
     },
     {
-      "name": "AI Project (TG)",
-      "reward": 300,
-      "url": "https://t.me/aiproject231"
-    },
-    {
-      "name": "Loomis Channel (TG)",
-      "reward": 300,
-      "url": "https://t.me/Loomis45"
-    },
-    {
-      "name": "AI Community (YouTube)",
-      "reward": 400,
-      "url": "https://www.youtube.com/@aicommunitylabs"
+      "id": "binance_web3",
+      "title": "Binance Web3 Екосистема",
+      "description": "Налаштуй свій Web3 гаманець для майбутніх виплат та отримання токенів проекту на блокчейні.",
+      "reward": 5000,
+      "link": "https://www.binance.com/uk-UA/web3wallet",
+      "type": "partner",
+      "button_text": "До Web3 гаманця"
     }
-  ]
+  ],
+  "referral_system": {
+    "bonus_per_friend": 1500,
+    "percent_from_friend_income": 10,
+    "referral_levels": [
+      { "level": 1, "reward_multiplier": 1.0 },
+      { "level": 2, "reward_multiplier": 1.2 }
+    ]
+  }
 }
