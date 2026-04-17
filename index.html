@@ -3,136 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis: Awakening</title>
+    <title>Lumis: Visual Evolution</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --neon-blue: #00f2ff;
-            --ai-purple: #bc00ff;
             --klyn-gold: #ffcc00;
-            --cyber-dark: #020202;
+            --text-gray: #aaaaaa;
         }
-        body { font-family: 'Courier New', monospace; background-color: var(--cyber-dark); color: white; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        .header { padding: 15px; background: rgba(0, 0, 0, 0.9); border-bottom: 2px solid var(--neon-blue); text-align: center; }
-        .balance-main { font-size: 26px; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
-        .balance-sub { font-size: 16px; color: var(--klyn-gold); margin-top: 5px; letter-spacing: 1px; }
+        body { 
+            font-family: 'Courier New', monospace; 
+            background-color: #050505; /* Колір фону, поки картинка вантажиться */
+            background-image: url('bg_lab.jpg'); /* ТВОЙ ФОН ЛАБОРАТОРІЇ */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white; 
+            margin: 0; padding: 0; 
+            display: flex; flex-direction: column; 
+            height: 100vh; overflow: hidden; 
+        }
         
-        .page { display: none; flex: 1; padding: 20px; text-align: center; overflow-y: auto; background: radial-gradient(circle at center, #111 0%, #020202 100%); }
+        /* Затемнення фону, щоб текст читався */
+        body::before {
+            content: "";
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 0;
+        }
+
+        .header, .lab-container, .nav-bar { z-index: 10; position: relative; }
+
+        .header { width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.85); border-bottom: 1px solid rgba(0, 242, 255, 0.3); text-align: center; }
+        .balance-main { font-size: 24px; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        .balance-sub { font-size: 14px; color: var(--klyn-gold); margin-top: 5px; }
+
+        .lab-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+
+        /* Камера інкубації (сама колба) */
+        .incubation-chamber {
+            width: 250px; height: 350px;
+            border: 3px solid rgba(0, 242, 255, 0.2);
+            border-radius: 125px 125px 30px 30px;
+            background: rgba(0, 242, 255, 0.05);
+            box-shadow: inset 0 0 50px rgba(0, 242, 255, 0.1);
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; cursor: pointer; position: relative;
+        }
+
+        /* ЗОБРАЖЕННЯ ЛЮМІСА (Динамічне) */
+        #lumis-avatar {
+            width: 90%; height: auto;
+            max-height: 90%;
+            object-fit: contain; /* Щоб картинка не розтягувалася */
+            filter: drop-shadow(0 0 15px var(--neon-blue));
+            transition: all 0.5s ease;
+        }
+
+        /* Анімація пульсації (серцебиття) */
+        .pulse { animation: pulse-anim 2s infinite ease-in-out; }
+        @keyframes pulse-anim {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px var(--neon-blue)); }
+            50% { transform: scale(1.03); filter: drop-shadow(0 0 25px var(--neon-blue)); }
+        }
+
+        /* Інтерфейс (кнопки, вкладки) */
+        .page { display: none; width: 100%; height: 100%; padding: 20px; box-sizing: border-box; text-align: center; overflow-y: auto; }
         .active { display: flex; flex-direction: column; align-items: center; }
 
-        /* Камера Інкубації з твоїм зображенням */
-        .sync-sphere {
-            width: 250px; height: 250px; border-radius: 50%;
-            border: 4px solid #333;
-            margin: 30px auto; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1), inset 0 0 20px rgba(188, 0, 255, 0.2);
-            position: relative; cursor: pointer; transition: transform 0.1s;
-            overflow: hidden;
-        }
-        .sync-sphere:active { transform: scale(0.95); }
-        
-        /* ТВОЄ ЗОБРАЖЕННЯ ГЕРОЯ */
-        #lumis-avatar {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            object-position: center;
-            transition: all 0.5s ease;
-            filter: drop-shadow(0 0 10px var(--neon-blue));
-        }
-
-        /* Бінарний код, що з'являється при кліку */
-        .code-overlay {
-            position: absolute; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            color: var(--neon-blue);
-            font-size: 10px; text-align: left; overflow: hidden;
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .sync-sphere:active .code-overlay { opacity: 1; }
-
-        .nav-bar { display: flex; background: #000; padding: 12px 0; border-top: 1px solid #333; }
+        .nav-bar { display: flex; background: rgba(0, 0, 0, 0.9); padding: 12px 0; border-top: 1px solid #222; width: 100%; }
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: #555; cursor: pointer; text-transform: uppercase; }
         .nav-item.active-nav { color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue); }
 
-        .card { background: rgba(255, 255, 255, 0.05); border: 1px solid #222; padding: 15px; border-radius: 4px; margin: 10px 0; width: 100%; max-width: 350px; display: flex; justify-content: space-between; align-items: center; }
-        .btn { background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 8px 12px; cursor: pointer; font-family: inherit; }
-        .btn:active { background: var(--neon-blue); color: black; }
+        .btn-exchange { background: transparent; border: 1px solid var(--klyn-gold); color: var(--klyn-gold); padding: 12px 20px; font-family: inherit; cursor: pointer; margin-top: 20px; width: 80%; max-width: 300px; }
         
-        .lore-text { font-size: 12px; color: #888; font-style: italic; margin-bottom: 10px; }
+        .stats-box { position: absolute; bottom: 15px; left: 15px; background: rgba(0, 0, 0, 0.6); padding: 5px 10px; border-radius: 4px; font-size: 10px; color: var(--text-gray); text-align: left; border: 1px solid #222; }
+
+        /* Ефект кліку */
+        .click-float { position: absolute; color: var(--neon-blue); font-weight: bold; pointer-events: none; animation: floatUp 0.6s ease-out forwards; z-index: 100; }
+        @keyframes floatUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-60px); } }
+
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="balance-main" id="lumis">0.00 LUMISCOIN</div>
-        <div class="balance-sub" id="klyn">0 KLYN ENERGY</div>
+        <div style="font-size: 10px; color: var(--text-gray); text-transform: uppercase;">Об'єкт: Lumis | Статус: <span id="status-name" style="color: var(--neon-blue);">Інкубація</span></div>
+        <div class="balance-main" id="lumis-balance">0.00 L</div>
+        <div class="balance-sub" id="klyn-balance">0 KLYN ENERGY</div>
     </div>
 
-    <div id="mining" class="page active">
-        <div class="lore-text">Люміс: протокол злиття активовано...</div>
-        <div class="sync-sphere" onclick="clickMine()">
-            <img src="lumis_hero.png" id="lumis-avatar"> <div class="code-overlay">
-                01011001 01010101 01010011<br>
-                01010011 01011001 01010101<br>
-                01010011 01011001 01010101<br>
-                ...activating sync...<br>
+    <div class="lab-container">
+        <div id="mining" class="page active">
+            <div class="incubation-chamber" onclick="clickMine(event)">
+                <img src="lumis_lvl1.png" id="lumis-avatar" class="pulse" alt="Lumis Core">
+                
+                <div class="stats-box">
+                    РІВЕНЬ: <span id="level-num">1</span><br>
+                    ПОТУЖНІСТЬ: +<span id="rate">1</span>/с
+                </div>
             </div>
+            
+            <button class="btn-exchange" onclick="exchangeCurrency()">СИНТЕЗУВАТИ LUMIS (1000 KLYN)</button>
         </div>
-        <p style="color: var(--ai-purple);">Синхронізація: +<span id="rate">1</span>/s</p>
-        <button class="btn" style="width: 100%; max-width: 300px; margin-top: 20px; border-color: var(--klyn-gold); color: var(--klyn-gold);" onclick="exchangeCurrency()">
-            КОНВЕРТУВАТИ ЕНЕРГІЮ В LUMIS (1000 KLYN)
-        </button>
-    </div>
 
-    <div id="shop" class="page">
-        <h2 style="color: var(--neon-blue);">Модулі Еволюції</h2>
-        <div class="card">
-            <div><strong>Нейронний Міст v1</strong><br><small>+1 до швидкості</small></div>
-            <button class="btn" onclick="buyUpgrade(0.5, 1)">0.50 L</button>
-        </div>
-        <div class="card">
-            <div><strong>Ядро "Оракул"</strong><br><small>+5 до швидкості</small></div>
-            <button class="btn" onclick="buyUpgrade(2.0, 5)">2.00 L</button>
+        <div id="shop" class="page">
+            <h2 style="color: var(--neon-blue);">МОДУЛІ ЕВОЛЮЦІЇ</h2>
+            <p style="color: var(--text-gray);">Завантаження списку модулів...</p>
         </div>
     </div>
-
-    <div id="tasks" class="page"><h2>Досьє героя</h2><p>Досліджуйте світ Люміса...</p></div>
 
     <div class="nav-bar">
-        <div class="nav-item active-nav" onclick="showPage('mining', this)">ІНКУБАЦІЯ</div>
-        <div class="nav-item" onclick="showPage('shop', this)">ЕВОЛЮЦІЯ</div>
-        <div class="nav-item" onclick="showPage('tasks', this)">МЕРЕЖА</div>
+        <div class="nav-item active-nav" onclick="showPage('mining', this)">Лабораторія</div>
+        <div class="nav-item" onclick="showPage('shop', this)">Модулі</div>
     </div>
 
     <script>
+        // --- НАЛАШТУВАННЯ ЗОБРАЖЕНЬ З GITHUB ---
+        // ЗАМІНИ 'ТВІЙ_ЮЗЕР' ТА 'ТВІЙ_РЕПОЗИТОРІЙ' НА СВОЇ ДАНІ
+        // const GITHUB_BASE_URL = "https://твій-юзернейм.github.io/назва-репозиторію/"; 
+        // АБО, якщо картинки в тому ж фолдері, просто використовуй імена файлів.
+
+        // Етапи еволюції (картинки, які ти завантажив)
+        const evolutionStages = [
+            { level: 1, image: 'lumis_lvl1.png', name: 'ПРОТОТИП', klynNeed: 0 },
+            { level: 2, image: 'lumis_lvl2.png', name: 'ГЕНЕЗИС', klynNeed: 2000 },
+            { level: 3, image: 'lumis_lvl3.png', name: 'НЕЙРО-ГІБРИД', klynNeed: 5000 },
+            { level: 4, image: 'lumis_lvl4.png', name: 'АНДРОЇД', klynNeed: 10000 },
+            { level: 5, image: 'lumis_lvl5.png', name: 'КІБЕР-ГЕРОЙ', klynNeed: 25000 }
+        ];
+
+        // --- ЛОГІКА ГРИ (LocalStorage) ---
         let klyn = parseFloat(localStorage.getItem('klyn')) || 0;
         let lumis = parseFloat(localStorage.getItem('lumis')) || 0;
         let rate = parseInt(localStorage.getItem('rate')) || 1;
-        let lastVisit = localStorage.getItem('lastVisit') || Date.now();
-
-        function calculateOffline() {
-            let now = Date.now();
-            let secondsAway = Math.floor((now - lastVisit) / 1000);
-            if (secondsAway > 15) { 
-                let earned = secondsAway * rate;
-                klyn += earned;
-                alert("Поки ви були в офлайні, Люміс накопичив: " + earned + " KLYN енергії.");
-            }
-        }
+        let totalMined = parseFloat(localStorage.getItem('totalMined')) || 0;
 
         function updateUI() {
-            document.getElementById('klyn').innerText = Math.floor(klyn) + " KLYN ENERGY";
-            document.getElementById('lumis').innerText = lumis.toFixed(2) + " LUMISCOIN";
+            // Оновлення балансів
+            document.getElementById('klyn-balance').innerText = Math.floor(klyn) + " KLYN ENERGY";
+            document.getElementById('lumis-balance').innerText = lumis.toFixed(2) + " L";
             document.getElementById('rate').innerText = rate;
+
+            // Логіка еволюції за картинками
+            let currentStage = evolutionStages[0];
+            for (let i = evolutionStages.length - 1; i >= 0; i--) {
+                if (totalMined >= evolutionStages[i].klynNeed) {
+                    currentStage = evolutionStages[i];
+                    break;
+                }
+            }
+
+            // Оновлення статусу та картинки
+            document.getElementById('level-num').innerText = currentStage.level;
+            document.getElementById('status-name').innerText = currentStage.name;
+            
+            let avatar = document.getElementById('lumis-avatar');
+            // Перевіряємо, чи картинка вже та, що треба, щоб не перезавантажувати її щосекунди
+            if (!avatar.src.includes(currentStage.image)) {
+                avatar.src = currentStage.image; // Встановлюємо ТВОРЮ КАРТИНКУ
+            }
+
+            // Збереження
             localStorage.setItem('klyn', klyn);
             localStorage.setItem('lumis', lumis);
             localStorage.setItem('rate', rate);
-            localStorage.setItem('lastVisit', Date.now());
+            localStorage.setItem('totalMined', totalMined);
         }
 
-        function clickMine() {
+        function clickMine(event) {
             klyn += 1;
+            totalMined += 1;
+            
+            // Ефект вильоту цифр
+            const float = document.createElement('div');
+            float.className = 'click-float';
+            float.innerText = '+1';
+            float.style.left = event.clientX + 'px';
+            float.style.top = event.clientY + 'px';
+            document.body.appendChild(float);
+            setTimeout(() => float.remove(), 600);
+
             updateUI();
         }
 
@@ -141,8 +193,9 @@
                 klyn -= 1000;
                 lumis += 0.10;
                 updateUI();
+                alert("Синтез завершено: +0.10 LUMISCOIN");
             } else {
-                alert("Системі потрібно мінімум 1000 KLYN!");
+                alert("Недостатньо KLYN енергії для синтезу!");
             }
         }
 
@@ -151,8 +204,6 @@
                 lumis -= cost;
                 rate += addRate;
                 updateUI();
-            } else {
-                alert("Недостатньо LUMISCOIN!");
             }
         }
 
@@ -163,12 +214,17 @@
             navEl.classList.add('active-nav');
         }
 
-        setInterval(() => { klyn += rate; updateUI(); }, 1000);
-        calculateOffline();
-        updateUI();
+        // Авто-майнінг
+        setInterval(() => {
+            klyn += rate;
+            totalMined += rate;
+            updateUI();
+        }, 1000);
 
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // Старт
+        updateUI();
+        window.Telegram.WebApp.expand();
     </script>
 </body>
 </html>
+
