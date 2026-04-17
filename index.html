@@ -3,133 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis Dynamic</title>
+    <title>Lumis Adventure</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --neon: #00f2ff; --gold: #ffcc00; --dark: #050505; --card-bg: #111; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .header { padding: 15px; background: #000; border-bottom: 1px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
-        #top-l { color: var(--neon); font-size: 18px; font-weight: bold; }
-        #top-k { color: var(--gold); font-size: 14px; font-weight: bold; }
-        .income-info { font-size: 10px; color: var(--neon); opacity: 0.8; }
-        .content { flex: 1; display: flex; position: relative; overflow-y: auto; }
-        .page { display: none; flex: 1; padding: 20px; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; }
+        :root { --neon: #00f2ff; --gold: #ffcc00; --dark: #050505; --red: #ff3333; }
+        body { font-family: 'Courier New', monospace; background: var(--dark); color: white; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .header { padding: 10px 15px; background: #000; border-bottom: 1px solid var(--neon); display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        #top-l { color: var(--neon); font-size: 16px; font-weight: bold; }
+        
+        .content { flex: 1; position: relative; display: flex; }
+        .page { display: none; flex: 1; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; }
         .active-page { display: flex; }
-        .main-coin { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #222 0%, #000 100%); border: 4px solid var(--neon); box-shadow: 0 0 25px rgba(0, 242, 255, 0.3); display: flex; align-items: center; justify-content: center; font-size: 70px; cursor: pointer; transition: transform 0.05s; margin: 30px 0; user-select: none; }
-        .main-coin:active { transform: scale(0.95); }
-        .main-coin::after { content: "L"; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
-        .card { background: var(--card-bg); border: 1px solid #222; padding: 15px; border-radius: 12px; width: 100%; margin: 8px 0; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
-        .farm-info { text-align: left; }
-        .farm-info strong { color: var(--neon); display: block; margin-bottom: 4px; }
-        .farm-info small { color: #888; }
-        .btn-buy { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; text-decoration: none; text-align: center; }
-        .btn-sync { background: none; border: 2px solid var(--gold); color: var(--gold); width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+
+        /* GAME STYLES */
+        #game-container { position: relative; width: 100%; height: 60vh; background: #000; border: 1px solid #222; overflow: hidden; }
+        #game-canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+        .game-controls { display: flex; width: 100%; justify-content: space-around; padding: 10px; background: #111; }
+        .ctrl-btn { width: 70px; height: 70px; background: rgba(0, 242, 255, 0.2); border: 2px solid var(--neon); border-radius: 50%; color: white; font-size: 24px; font-weight: bold; }
+
+        .btn-sync { background: none; border: 2px solid var(--gold); color: var(--gold); padding: 15px; border-radius: 12px; font-weight: bold; width: 90%; margin: 10px 0; cursor: pointer; }
         .nav { display: flex; background: #000; border-top: 1px solid #222; padding: 10px 0 25px 0; }
-        .nav-item { flex: 1; text-align: center; font-size: 10px; color: #444; cursor: pointer; }
+        .nav-item { flex: 1; text-align: center; font-size: 9px; color: #444; cursor: pointer; }
         .nav-item.active { color: var(--neon); }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
-        .tap-anim { position: absolute; color: var(--neon); font-weight: bold; animation: fly 0.6s forwards; pointer-events: none; }
-        @keyframes fly { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-100px); } }
+        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="stats">
+        <div>
             <div id="top-l">0.00 LUMIS</div>
-            <div id="top-k">0 KLYN</div>
-            <div class="income-info">ПРИБУТОК: +<span id="income-rate">0</span>/SEC</div>
+            <div id="top-k" style="color:var(--gold); font-size:12px">0 KLYN</div>
         </div>
-        <div style="font-size: 10px; text-align: right; color: var(--neon);">RANK: HYBRID</div>
+        <div style="text-align:right"><small id="game-status" style="color:var(--neon)">STATUS: READY</small></div>
     </div>
 
     <div class="content">
-        <div id="p-game" class="page active-page">
-            <div class="main-coin" onclick="handleTap(event)"></div>
-            <button class="btn-sync" onclick="syncLumis()">СИНТЕЗ (1000 KLYN ➔ 0.1 L)</button>
+        <div id="p-home" class="page active-page">
+            <div style="width:180px; height:180px; border-radius:50%; border:4px solid var(--neon); margin:40px 0; display:flex; align-items:center; justify-content:center; font-size:60px; box-shadow:0 0 20px var(--neon);" onclick="k++; refresh();">L</div>
+            <button class="btn-sync" onclick="if(k>=1000){k-=1000;l+=0.1;refresh();}">СИНТЕЗ (1000 KLYN ➔ 0.1 L)</button>
         </div>
 
-        <div id="p-farms" class="page">
-            <h2 style="color:var(--neon)">AI ФЕРМИ</h2>
-            <div id="farms-list" style="width: 100%;"></div>
-        </div>
-
-        <div id="p-tasks" class="page">
-            <h2 style="color:var(--neon)">КВЕСТИ</h2>
-            <div id="tasks-list" style="width: 100%;"></div>
+        <div id="p-mission" class="page">
+            <div id="game-container">
+                <canvas id="game-canvas"></canvas>
+                <div style="position:absolute; top:10px; left:10px; color:var(--neon)" id="game-ui">SCORE: 0</div>
+            </div>
+            <div class="game-controls">
+                <button class="ctrl-btn" onmousedown="move(-1)" onmouseup="stopMove()">←</button>
+                <button class="ctrl-btn" onclick="shoot()">🔥</button>
+                <button class="ctrl-btn" onmousedown="move(1)" onmouseup="stopMove()">→</button>
+            </div>
+            <button class="btn-sync" id="start-btn" onclick="startGame()">ЗАПУСТИТИ РІВЕНЬ 1</button>
         </div>
 
         <div id="p-acc" class="page">
-            <h2 style="color:var(--neon)">ПРОФІЛЬ</h2>
-            <div class="card"><span>KLYN Баланс:</span><b id="p-k">0</b></div>
-            <div class="card"><span>LUMIS Баланс:</span><b id="p-l">0.00</b></div>
-            <div class="card"><span>Швидкість:</span><b style="color: var(--neon);">+<span id="p-r">0</span>/с</b></div>
+            <h3 style="color:var(--neon)">CYBER PROFILE</h3>
+            <div style="width:90%; background:#111; padding:15px; border-radius:10px; margin:5px 0">
+                LUMIS Balance: <span id="p-l" style="color:var(--neon)">0</span><br>
+                KLYN Energy: <span id="p-k" style="color:var(--gold)">0</span>
+            </div>
         </div>
     </div>
 
     <div class="nav">
-        <div class="nav-item active" onclick="switchTab('p-game', this)"><span class="nav-icon">🎮</span>СИНТЕЗ</div>
-        <div class="nav-item" onclick="switchTab('p-farms', this)"><span class="nav-icon">⛏</span>ФЕРМИ</div>
-        <div class="nav-item" onclick="switchTab('p-tasks', this)"><span class="nav-icon">📋</span>КВЕСТИ</div>
+        <div class="nav-item active" onclick="switchTab('p-home', this)"><span class="nav-icon">💎</span>СИНТЕЗ</div>
+        <div class="nav-item" onclick="switchTab('p-mission', this)"><span class="nav-icon">⚔️</span>МІСІЯ</div>
         <div class="nav-item" onclick="switchTab('p-acc', this)"><span class="nav-icon">👤</span>ПРОФІЛЬ</div>
     </div>
 
     <script>
-        let k = parseFloat(localStorage.getItem('lm_k_dyn')) || 0;
-        let l = parseFloat(localStorage.getItem('lm_l_dyn')) || 0;
-        let r = parseInt(localStorage.getItem('lm_r_dyn')) || 0;
-
-        async function loadData() {
-            try {
-                const response = await fetch('data.json');
-                const data = await response.json();
-                
-                // Рендеримо Ферми
-                const fList = document.getElementById('farms-list');
-                fList.innerHTML = '';
-                data.farms.forEach(f => {
-                    fList.innerHTML += `<div class="card"><div class="farm-info"><strong>${f.name}</strong><small>${f.desc}</small></div><button class="btn-buy" onclick="buyFarm(${f.price}, ${f.add})">${f.price} L</button></div>`;
-                });
-
-                // Рендеримо Квести
-                const tList = document.getElementById('tasks-list');
-                tList.innerHTML = '';
-                data.tasks.forEach(t => {
-                    tList.innerHTML += `<div class="card"><div class="farm-info"><strong>${t.name}</strong><small>+${t.reward} KLYN</small></div><a href="${t.url}" target="_blank" class="btn-buy" style="border-color:var(--neon); color:var(--neon);">GO</a></div>`;
-                });
-            } catch (e) { console.error("Помилка завантаження JSON", e); }
-        }
+        let k = parseFloat(localStorage.getItem('lum_k_v8')) || 0;
+        let l = parseFloat(localStorage.getItem('lum_l_v8')) || 0;
+        
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let gameActive = false;
+        let player = { x: 50, y: 0, w: 30, h: 30, dx: 0 };
+        let enemies = [];
+        let bullets = [];
+        let boss = null;
+        let score = 0;
 
         function refresh() {
             document.getElementById('top-k').innerText = Math.floor(k) + " KLYN";
             document.getElementById('top-l').innerText = l.toFixed(2) + " LUMIS";
-            document.getElementById('income-rate').innerText = r;
             document.getElementById('p-k').innerText = Math.floor(k);
             document.getElementById('p-l').innerText = l.toFixed(2);
-            document.getElementById('p-r').innerText = r;
-            localStorage.setItem('lm_k_dyn', k);
-            localStorage.setItem('lm_l_dyn', l);
-            localStorage.setItem('lm_r_dyn', r);
-        }
-
-        function handleTap(e) {
-            k += 1;
-            let d = document.createElement('div');
-            d.className = 'tap-anim';
-            d.innerText = '+1';
-            d.style.left = e.clientX + 'px'; d.style.top = e.clientY + 'px';
-            document.body.appendChild(d);
-            setTimeout(() => d.remove(), 600);
-            refresh();
-        }
-
-        function buyFarm(price, add) {
-            if (l >= price) { l -= price; r += add; refresh(); }
-            else { alert("Мало LUMIS!"); }
-        }
-
-        function syncLumis() {
-            if (k >= 1000) { k -= 1000; l += 0.1; refresh(); }
+            localStorage.setItem('lum_k_v8', k);
+            localStorage.setItem('lum_l_v8', l);
         }
 
         function switchTab(id, el) {
@@ -137,12 +100,103 @@
             document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
             document.getElementById(id).classList.add('active-page');
             el.classList.add('active');
+            if(id === 'p-mission') resize();
         }
 
-        setInterval(() => { if(r > 0) { k += r; refresh(); } }, 1000);
-        
-        loadData();
-        refresh();
+        function resize() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+            player.y = canvas.height - 40;
+        }
+
+        function startGame() {
+            gameActive = true; score = 0; enemies = []; bullets = []; boss = null;
+            document.getElementById('start-btn').style.display = 'none';
+            gameLoop();
+        }
+
+        function move(dir) { player.dx = dir * 5; }
+        function stopMove() { player.dx = 0; }
+        function shoot() { bullets.push({ x: player.x + 30, y: player.y + 10, dx: 7 }); }
+
+        function gameLoop() {
+            if(!gameActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Гравець
+            player.x += player.dx;
+            if(player.x < 0) player.x = 0;
+            if(player.x > canvas.width - 30) player.x = canvas.width - 30;
+            ctx.fillStyle = '#00f2ff';
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+
+            // Булети
+            bullets.forEach((b, i) => {
+                b.x += b.dx;
+                ctx.fillStyle = '#ffcc00';
+                ctx.fillRect(b.x, b.y, 10, 5);
+                if(b.x > canvas.width) bullets.splice(i, 1);
+            });
+
+            // Вороги
+            if(Math.random() < 0.02 && !boss) {
+                enemies.push({ x: canvas.width, y: canvas.height - 40, w: 20, h: 20, hp: 1 });
+            }
+
+            enemies.forEach((en, ei) => {
+                en.x -= 3;
+                ctx.fillStyle = '#ff3333';
+                ctx.fillRect(en.x, en.y, en.w, en.h);
+
+                // Колізія булет-ворог
+                bullets.forEach((b, bi) => {
+                    if(b.x < en.x + en.w && b.x + 10 > en.x && b.y < en.y + en.h && b.y + 5 > en.y) {
+                        enemies.splice(ei, 1);
+                        bullets.splice(bi, 1);
+                        score++;
+                        k += 10;
+                        document.getElementById('game-ui').innerText = "SCORE: " + score;
+                        refresh();
+                    }
+                });
+
+                if(en.x < 0) { gameActive = false; endGame("ЗЛАМАНО!"); }
+            });
+
+            // БОС (з'являється на 20 очках)
+            if(score >= 20 && !boss) {
+                boss = { x: canvas.width - 60, y: canvas.height - 100, w: 60, h: 100, hp: 50 };
+            }
+
+            if(boss) {
+                ctx.fillStyle = '#ff00ff';
+                ctx.fillRect(boss.x, boss.y, boss.w, boss.h);
+                ctx.fillStyle = 'white';
+                ctx.fillText("BOSS HP: " + boss.hp, boss.x, boss.y - 10);
+
+                bullets.forEach((b, bi) => {
+                    if(b.x > boss.x) {
+                        boss.hp--;
+                        bullets.splice(bi, 1);
+                        if(boss.hp <= 0) {
+                            l += 1.0; // Винагорода 1 LumisCoin
+                            gameActive = false;
+                            endGame("БОС ЗНИЩЕНИЙ! +1 L");
+                        }
+                    }
+                });
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame(msg) {
+            document.getElementById('start-btn').style.display = 'block';
+            document.getElementById('start-btn').innerText = msg + " ГРАТИ ЗНОВУ?";
+            refresh();
+        }
+
+        refresh(); resize();
         Telegram.WebApp.expand();
     </script>
 </body>
