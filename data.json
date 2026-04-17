@@ -29,28 +29,18 @@
     {
       "id": "binance_bonus",
       "title": "Binance: Отримай бонус USDC",
-      "description": "Забери свій вітальний бонус у USDC через офіційну реферальну програму Binance та отримай +15 000 KLYN у грі за активацію.",
+      "description": "Забери вітальний бонус у USDC через реферальну програму та отримай +15,000 KLYN.",
       "reward": 15000,
       "link": "https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=uk-UA&ref=GRO_28502_8WOY9",
-      "type": "partner",
-      "button_text": "Активувати бонус USDC"
+      "button_text": "Активувати USDC"
     },
     {
       "id": "binance_web3",
       "title": "Binance Web3 Екосистема",
-      "description": "Налаштуй свій Web3 гаманець для майбутніх виплат та отримання токенів проекту на блокчейні.",
+      "description": "Налаштуй свій Web3 гаманець для майбутніх виплат.",
       "reward": 5000,
       "link": "https://www.binance.com/uk-UA/web3wallet",
-      "type": "partner",
-      "button_text": "До Web3 гаманця"
+      "button_text": "До гаманця"
     }
-  ],
-  "referral_system": {
-    "bonus_per_friend": 1500,
-    "percent_from_friend_income": 10,
-    "referral_levels": [
-      { "level": 1, "reward_multiplier": 1.0 },
-      { "level": 2, "reward_multiplier": 1.2 }
-    ]
-  }
+  ]
 }
