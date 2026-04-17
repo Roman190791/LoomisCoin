@@ -1,176 +1,148 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis Ecosystem</title>
+    <title>Lumis Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --neon-blue: #00f2ff;
-            --ai-purple: #bc00ff;
-            --klyn-gold: #ffcc00;
-            --cyber-dark: #050505;
+            --neon: #00f2ff;
+            --gold: #ffcc00;
+            --dark: #050505;
         }
-        body { font-family: 'Courier New', monospace; background-color: var(--cyber-dark); color: white; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { 
+            font-family: sans-serif; background: var(--dark); color: white; 
+            margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
         
-        /* HEADER */
-        .header { padding: 10px 15px; background: #000; border-bottom: 2px solid var(--neon-blue); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .header-stats { text-align: left; }
-        .header-stats div { font-size: 14px; font-weight: bold; }
+        /* Header */
+        .header { padding: 15px; background: #000; border-bottom: 1px solid var(--neon); display: flex; justify-content: space-between; }
+        .stats div { font-size: 14px; font-weight: bold; }
 
-        /* PAGES */
-        .page { display: none; flex: 1; padding: 20px; text-align: center; overflow-y: auto; background: radial-gradient(circle at center, #111 0%, #000 100%); position: relative; }
-        .active { display: flex; flex-direction: column; align-items: center; }
+        /* Navigation */
+        .nav { display: flex; background: #000; border-top: 1px solid #222; padding: 10px 0; }
+        .nav-item { flex: 1; text-align: center; font-size: 10px; color: #555; cursor: pointer; }
+        .nav-item.active { color: var(--neon); }
 
-        /* CLICKER SCREEN */
+        /* Pages */
+        .page { display: none; flex: 1; padding: 20px; flex-direction: column; align-items: center; overflow-y: auto; }
+        .page.active { display: flex; }
+
+        /* Clicker Image */
         .chamber {
-            width: 260px; height: 360px; border: 2px solid var(--neon-blue); border-radius: 130px 130px 30px 30px;
-            position: relative; overflow: hidden; background: #000; box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
-            cursor: pointer; transition: transform 0.1s; margin: 20px 0;
+            width: 240px; height: 320px; border: 2px solid var(--neon); border-radius: 120px 120px 20px 20px;
+            overflow: hidden; position: relative; margin: 20px 0; background: #111;
         }
-        .chamber:active { transform: scale(0.97); }
-        #lumis-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
-        .scanline { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); animation: scan 4s linear infinite; }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* UI ELEMENTS */
-        .card { background: rgba(20, 20, 20, 0.8); border: 1px solid #333; padding: 15px; border-radius: 12px; margin: 8px 0; width: 90%; display: flex; justify-content: space-between; align-items: center; }
-        .btn { background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 10px 15px; border-radius: 6px; cursor: pointer; font-family: inherit; }
-        .btn-main { border-color: var(--klyn-gold); color: var(--klyn-gold); width: 90%; margin-top: 10px; padding: 15px; }
+        #lumis-img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* NAVIGATION */
-        .nav-bar { display: flex; background: #000; padding: 10px 0; border-top: 1px solid #222; }
-        .nav-item { flex: 1; text-align: center; font-size: 10px; color: #555; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
-        .nav-item.active-nav { color: var(--neon-blue); }
-        .nav-icon { font-size: 20px; margin-bottom: 4px; }
+        /* Buttons */
+        .btn { 
+            background: transparent; border: 1px solid var(--neon); color: var(--neon); 
+            padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 80%; margin: 10px 0;
+        }
+        .btn-gold { border-color: var(--gold); color: var(--gold); }
 
-        /* PROFILE */
-        .wallet-btn { background: var(--neon-blue); color: black; font-weight: bold; border: none; padding: 12px 20px; border-radius: 8px; margin-top: 20px; }
-        .profile-info { margin-top: 20px; text-align: left; width: 80%; }
-        .profile-info p { border-bottom: 1px solid #222; padding: 10px 0; display: flex; justify-content: space-between; }
-
-        /* PARTICLES */
-        .particle { position: absolute; color: var(--neon-blue); font-weight: bold; pointer-events: none; animation: fly 0.6s ease-out forwards; }
+        /* Floating +1 */
+        .tap-anim { position: absolute; color: var(--neon); font-weight: bold; animation: fly 0.6s forwards; pointer-events: none; }
         @keyframes fly { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-100px); } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-stats">
-            <div style="color: var(--neon-blue);" id="h-lumis">0.00 L</div>
-            <div style="color: var(--klyn-gold);" id="h-klyn">0 KLYN</div>
+        <div class="stats">
+            <div style="color:var(--neon)" id="l-val">0.00 L</div>
+            <div style="color:var(--gold)" id="k-val">0 KLYN</div>
         </div>
-        <div style="font-size: 10px; color: #444;">ID: <span id="user-id">LUMIS_USER</span></div>
+        <div style="font-size:10px">ID: LUMIS_HERO</div>
     </div>
 
-    <div id="game" class="page active">
-        <div class="chamber" onclick="tap(event)">
-            <div class="scanline"></div>
-            <img src="lumis.jpg" id="lumis-img" onerror="this.src='https://via.placeholder.com/280x380?text=Lumis+Photo'">
+    <div id="p-game" class="page active">
+        <div class="chamber" onclick="doTap(event)">
+            <img src="lumis.jpg" id="lumis-img" onerror="this.src='https://via.placeholder.com/240x320?text=Lumis+Image'">
         </div>
-        <div style="color: var(--ai-purple); font-size: 14px; margin-bottom: 10px;">Синхронізація: +<span id="p-rate">1</span>/s</div>
-        <button class="btn btn-main" onclick="exchange()">СИНТЕЗУВАТИ LUMIS (1000 KLYN)</button>
+        <div id="rate-display" style="color:#888; margin-bottom: 10px;">Дохід: +1/с</div>
+        <button class="btn btn-gold" onclick="doSync()">СИНТЕЗУВАТИ (1000 KLYN)</button>
     </div>
 
-    <div id="farms" class="page">
-        <h2 style="color: var(--neon-blue);">ФЕРМИ</h2>
-        <p style="font-size: 12px; color: #777;">Покращуйте пасивний видобуток KLYN</p>
-        <div class="card">
-            <div><strong>Нейро-мережа v1</strong><br><small>+1 KLYN/сек</small></div>
-            <button class="btn" onclick="buyUpgrade(0.5, 1)">0.5 L</button>
-        </div>
-        <div class="card">
-            <div><strong>Обчислювач ШІ</strong><br><small>+5 KLYN/сек</small></div>
-            <button class="btn" onclick="buyUpgrade(2.0, 5)">2.0 L</button>
+    <div id="p-farms" class="page">
+        <h2>ФЕРМИ</h2>
+        <div style="width:100%; border:1px solid #333; padding:15px; display:flex; justify-content:space-between; align-items:center;">
+            <span>Нейро-мережа (+1/с)</span>
+            <button class="btn" style="width:auto" onclick="buyFarm(0.5, 1)">0.5 L</button>
         </div>
     </div>
 
-    <div id="shop" class="page">
-        <h2 style="color: var(--neon-blue);">МАГАЗИН</h2>
-        <div class="card">
-            <div><strong>Поповнити USDT</strong><br><small>Мінімум 1 USDT</small></div>
-            <button class="btn">💳 ТАП</button>
-        </div>
-        <div class="card">
-            <div><strong>Lumis Coin</strong><br><small>Пряма купівля</small></div>
-            <button class="btn" style="border-color: var(--klyn-gold); color: var(--klyn-gold);">BUY</button>
-        </div>
+    <div id="p-shop" class="page">
+        <h2>МАГАЗИН</h2>
+        <p>Операції з USDT та Lumis Coin</p>
+        <button class="btn">ПОПОВНИТИ USDT</button>
     </div>
 
-    <div id="account" class="page">
-        <h2 style="color: var(--neon-blue);">ПРОФІЛЬ</h2>
-        <div class="profile-info">
-            <p><span>Статус:</span> <span style="color: var(--neon-blue);">Active Hybrid</span></p>
-            <p><span>Баланс KLYN:</span> <span id="acc-klyn">0</span></p>
-            <p><span>Баланс LUMIS:</span> <span id="acc-lumis">0.00</span></p>
-            <p><span>Дохід/сек:</span> <span id="acc-rate">1</span></p>
+    <div id="p-acc" class="page">
+        <h2>ПРОФІЛЬ</h2>
+        <div style="text-align:left; width:100%">
+            <p>KLYN: <span id="acc-k">0</span></p>
+            <p>LUMIS: <span id="acc-l">0.00</span></p>
         </div>
-        <button class="wallet-btn" onclick="alert('Підключення гаманця скоро...')">ПІДКЛЮЧИТИ ГАМАНЕЦЬ</button>
+        <button class="btn" style="background:var(--neon); color:black">ГАМАНЕЦЬ</button>
     </div>
 
-    <div class="nav-bar">
-        <div class="nav-item active-nav" onclick="nav('game', this)"><span class="nav-icon">🎮</span>ГРАТИ</div>
-        <div class="nav-item" onclick="nav('farms', this)"><span class="nav-icon">⛏</span>МАЙНІНГ</div>
-        <div class="nav-item" onclick="nav('shop', this)"><span class="nav-icon">🛒</span>МАГАЗИН</div>
-        <div class="nav-item" onclick="nav('account', this)"><span class="nav-icon">📊</span>ПРОФІЛЬ</div>
+    <div class="nav">
+        <div class="nav-item active" onclick="go('p-game', this)">🎮 ГРАТИ</div>
+        <div class="nav-item" onclick="go('p-farms', this)">⛏ МАЙНІНГ</div>
+        <div class="nav-item" onclick="go('p-shop', this)">🛒 МАГАЗИН</div>
+        <div class="nav-item" onclick="go('p-acc', this)">📊 ПРОФІЛЬ</div>
     </div>
 
     <script>
-        let klyn = parseFloat(localStorage.getItem('klyn')) || 0;
-        let lumis = parseFloat(localStorage.getItem('lumis')) || 0;
-        let rate = parseInt(localStorage.getItem('rate')) || 1;
+        let k = parseFloat(localStorage.getItem('k')) || 0;
+        let l = parseFloat(localStorage.getItem('l')) || 0;
+        let r = parseInt(localStorage.getItem('r')) || 1;
 
-        function update() {
-            // Оновлення всіх екранів
-            document.getElementById('h-klyn').innerText = Math.floor(klyn) + " KLYN";
-            document.getElementById('h-lumis').innerText = lumis.toFixed(2) + " L";
-            document.getElementById('p-rate').innerText = rate;
+        function refresh() {
+            document.getElementById('k-val').innerText = Math.floor(k) + " KLYN";
+            document.getElementById('l-val').innerText = l.toFixed(2) + " L";
+            document.getElementById('acc-k').innerText = Math.floor(k);
+            document.getElementById('acc-l').innerText = l.toFixed(2);
+            document.getElementById('rate-display').innerText = "Дохід: +" + r + "/с";
             
-            // Оновлення в профілі
-            document.getElementById('acc-klyn').innerText = Math.floor(klyn);
-            document.getElementById('acc-lumis').innerText = lumis.toFixed(2);
-            document.getElementById('acc-rate').innerText = rate;
-
-            localStorage.setItem('klyn', klyn);
-            localStorage.setItem('lumis', lumis);
-            localStorage.setItem('rate', rate);
+            localStorage.setItem('k', k);
+            localStorage.setItem('l', l);
+            localStorage.setItem('r', r);
         }
 
-        function tap(e) {
-            klyn += 1;
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.innerText = '+1';
-            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 600);
-            update();
+        function doTap(e) {
+            k += 1;
+            let d = document.createElement('div');
+            d.className = 'tap-anim';
+            d.innerText = '+1';
+            d.style.left = e.clientX + 'px';
+            d.style.top = e.clientY + 'px';
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 600);
+            refresh();
         }
 
-        function exchange() {
-            if (klyn >= 1000) { klyn -= 1000; lumis += 0.10; update(); }
-            else { alert("Потрібно 1000 KLYN!"); }
+        function doSync() {
+            if (k >= 1000) { k -= 1000; l += 0.1; refresh(); }
         }
 
-        function buyUpgrade(cost, add) {
-            if (lumis >= cost) { lumis -= cost; rate += add; update(); }
-            else { alert("Недостатньо LUMIS!"); }
+        function buyFarm(cost, add) {
+            if (l >= cost) { l -= cost; r += add; refresh(); }
         }
 
-        function nav(pageId, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
-            document.getElementById(pageId).classList.add('active');
-            el.classList.add('active-nav');
+        function go(id, el) {
+            document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
         }
 
-        setInterval(() => { klyn += rate; update(); }, 1000);
-        update();
-        window.Telegram.WebApp.expand();
+        setInterval(() => { k += r; refresh(); }, 1000);
+        refresh();
+        Telegram.WebApp.expand();
     </script>
 </body>
 </html>
-
-
