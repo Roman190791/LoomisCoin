@@ -3,380 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis Terminal | Cyber-Merge Edition</title>
+    <title>Lumis Cyber-Dragon | Prototype</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap');
-        
-        :root {
-            --gold: #f3ba2f;
-            --neon-blue: #00f2ff;
-            --bg: #0b0e11;
-            --card: rgba(255, 255, 255, 0.05);
-            --green: #00ff88;
-        }
+        :root { --gold: #f3ba2f; --neon: #00f2ff; --bg: #0b0e11; --card: rgba(255, 255, 255, 0.05); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            margin: 0; background: var(--bg); color: white;
-            font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden;
-        }
+        /* Верхня панель */
+        .top-panel { height: 75px; background: #181a20; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; position: relative; z-index: 100; }
+        .stat-val { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; }
+        .stat-label { font-size: 0.5rem; color: #888; text-transform: uppercase; }
 
-        /* BOOT SCREEN */
-        #boot-screen {
-            position: fixed; inset: 0; background: black; z-index: 10000;
-            display: flex; flex-direction: column; justify-content: center; padding: 30px;
-            color: var(--green); font-size: 0.8rem;
-        }
+        .screen { display: none; position: absolute; inset: 75px 0 85px 0; padding: 15px; overflow-y: auto; }
+        .active-screen { display: block; }
 
-        /* TOP PANEL */
-        .top-panel {
-            height: 80px; background: #181a20; border-bottom: 2px solid var(--gold);
-            display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        /* Генератор та Енергія */
+        .gen-area { text-align: center; margin: 15px 0; position: relative; }
+        .cyber-box { 
+            width: 130px; height: 130px; margin: 0 auto; background: radial-gradient(circle, var(--gold) 0%, transparent 75%);
+            border: 2px solid var(--gold); border-radius: 25px; display: flex; align-items: center; justify-content: center;
+            font-size: 4rem; cursor: pointer; transition: 0.1s; box-shadow: 0 0 20px rgba(243,186,47,0.1);
         }
-        .hp-counter { color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.75rem; text-shadow: 0 0 5px var(--neon-blue); }
+        .cyber-box:active { transform: scale(0.92); }
+        .energy-bar-bg { width: 140px; height: 6px; background: #222; margin: 10px auto; border-radius: 3px; overflow: hidden; border: 1px solid var(--neon); }
+        .energy-fill { height: 100%; background: var(--neon); width: 100%; transition: 0.3s; box-shadow: 0 0 10px var(--neon); }
 
-        /* SCREENS */
-        .screen {
-            display: none; position: absolute; inset: 80px 0 85px 0;
-            padding: 20px; overflow-y: auto; background: radial-gradient(circle at center, #161a1e 0%, #0b0e11 100%);
+        /* Сітка 4х4 */
+        .factory-grid { 
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px; 
+            background: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid #333; 
         }
-        .active-screen { display: block; animation: scanline 0.2s linear; }
+        .slot { 
+            aspect-ratio: 1; background: #181a20; border: 1px solid #2a2d33; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; position: relative; font-size: 1.8rem;
+        }
+        .slot.occupied { border-color: var(--gold); background: rgba(243,186,47,0.02); }
+        .slot.selected { border-color: var(--neon); background: rgba(0,242,255,0.05); }
+        .lvl-tag { position: absolute; bottom: 4px; right: 4px; font-size: 0.55rem; color: var(--gold); background: #000; padding: 1px 4px; border-radius: 4px; font-weight: bold; }
 
-        /* MAIN TAB */
-        .bal-val { font-family: 'Orbitron'; font-size: 2.2rem; color: var(--gold); }
-        .lumis-core {
-            width: 220px; height: 220px; margin: 20px auto;
-            position: relative; border-radius: 50%;
-            background: radial-gradient(circle, #f3ba2f 0%, #000 70%);
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 40px rgba(243, 186, 47, 0.2);
-            cursor: pointer; transition: 0.05s;
-        }
-        .lumis-core:active { transform: scale(0.95); filter: brightness(1.2); }
-        .lumis-core::after { content: 'L'; font-family: 'Orbitron'; font-size: 6rem; color: black; font-weight: 900; }
+        /* Магазин */
+        .shop-item { background: var(--card); border: 1px solid #333; padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .buy-btn { background: var(--gold); color: black; border: none; padding: 10px 15px; border-radius: 8px; font-family: 'Orbitron'; font-weight: bold; font-size: 0.7rem; }
+        .buy-btn:disabled { opacity: 0.2; }
 
-        /* MERGE GRID */
-        .grid-container {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 8px; margin-top: 15px; padding: 10px;
-            background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid var(--neon-blue);
-        }
-        .grid-cell {
-            aspect-ratio: 1; background: rgba(255,255,255,0.02);
-            border: 1px dashed rgba(0,242,255,0.15); border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; cursor: pointer; transition: 0.2s;
-        }
-        .grid-cell.active {
-            background: radial-gradient(circle, rgba(243,186,47,0.1) 0%, rgba(0,0,0,0) 80%);
-            border: 1px solid var(--gold); box-shadow: 0 0 10px rgba(243,186,47,0.1);
-        }
-        .grid-cell.selected { border-color: var(--neon-blue); background: rgba(0, 242, 255, 0.1); }
-        .core-lvl { position: absolute; bottom: 2px; right: 5px; font-size: 0.5rem; color: var(--gold); font-weight: bold; }
-        .core-icon { font-size: 1.5rem; filter: drop-shadow(0 0 5px var(--gold)); }
-
-        /* CARDS & BUTTONS */
-        .cyber-card {
-            background: var(--card); border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px; border-radius: 14px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn-cyber {
-            background: var(--gold); color: black; border: none; padding: 10px 15px;
-            border-radius: 8px; font-family: 'Orbitron'; font-weight: bold; cursor: pointer;
-        }
-        .btn-cyber:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        /* NAV */
-        .nav {
-            height: 85px; background: #181a20; position: fixed; bottom: 0; width: 100%;
-            display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid var(--gold); z-index: 100;
-        }
-        .nav-item { text-align: center; color: #555; font-size: 0.6rem; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--gold); }
-        .nav-item i { font-size: 1.6rem; display: block; margin-bottom: 4px; }
-
-        @keyframes scanline { from { opacity: 0.7; } to { opacity: 1; } }
-        .floating-text { position: fixed; pointer-events: none; color: var(--gold); font-weight: bold; animation: fly 0.6s forwards; z-index: 1000; }
-        @keyframes fly { to { transform: translateY(-80px); opacity: 0; } }
+        /* Навігація */
+        .nav { height: 85px; background: #181a20; position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--gold); }
+        .nav-btn { text-align: center; color: #555; font-size: 0.6rem; cursor: pointer; }
+        .nav-btn.active { color: var(--gold); }
+        .nav-btn i { font-size: 1.6rem; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <div id="boot-screen"></div>
-
     <div class="top-panel">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:35px; height:35px; background:var(--gold); border-radius:50%; border:2px solid var(--neon-blue); display:flex; align-items:center; justify-content:center; color:black; font-weight:bold; font-size:0.7rem;">OP</div>
-            <div>
-                <div id="rank-name" style="font-size:0.55rem; color:#888;">LVL 1 JUNIOR</div>
-                <div class="hp-counter" id="hp-display">⚡ 0.00000 HP/H</div>
-            </div>
+        <div>
+            <div class="stat-label">Production Speed</div>
+            <div id="hp-display" class="stat-val">⚡ 0.00000 H/H</div>
         </div>
         <div style="text-align:right">
-            <div style="font-size:0.5rem; color:#888;">VAULT (LC)</div>
-            <div id="top-bal" style="color:var(--gold); font-family:'Orbitron'; font-size:1.1rem;">0.00000</div>
+            <div class="stat-label">Lumis Vault</div>
+            <div id="lumis-display" class="stat-val">0.00000</div>
         </div>
     </div>
 
-    <div id="scr-main" class="screen active-screen">
-        <div style="text-align:center; margin-bottom:15px;">
-            <div style="font-size:0.6rem; letter-spacing:2px; color:#888;">KLYN ACCUMULATED</div>
-            <div class="bal-val" id="klyn-bal">0</div>
+    <div id="scr-factory" class="screen active-screen">
+        <div class="gen-area">
+            <div class="cyber-box" onclick="spawnFromBox()">📦</div>
+            <div class="energy-bar-bg"><div id="en-fill" class="energy-fill"></div></div>
+            <div id="en-text" style="font-size:0.6rem; color:#888;">ENERGY: 100/100</div>
         </div>
-        <div class="lumis-core" id="tap-target"></div>
-        <div style="width:85%; margin: 15px auto;">
-            <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:5px;">
-                <span>ENERGY CORE</span><span id="energy-text">1000/1000</span>
-            </div>
-            <div style="height:8px; background:#222; border-radius:4px; border:1px solid var(--neon-blue); overflow:hidden;">
-                <div id="energy-fill" style="width:100%; height:100%; background:var(--neon-blue); transition: 0.3s;"></div>
-            </div>
-        </div>
+        <div class="factory-grid" id="main-grid"></div>
+        <div style="text-align:center; margin-top:15px; font-size:0.5rem; color:#444; letter-spacing:1px;">MERGE UNITS TO UNLOCK HIGHER LEVELS</div>
     </div>
 
-    <div id="scr-earn" class="screen">
-        <h3 style="color:var(--neon-blue); font-family:'Orbitron'; font-size:1rem;">NETWORK LINKS</h3>
-        <div class="cyber-card" style="border-color:var(--gold); background: rgba(243,186,47,0.05);">
-            <div><div style="font-size:0.7rem;">Referral Program</div><div style="font-size:0.55rem; color:#888;">Earn 10% from every merge</div></div>
-            <button class="btn-cyber" onclick="copyRef()">COPY REF</button>
-        </div>
-        <div id="links-container" style="margin-top:15px;"></div>
+    <div id="scr-market" class="screen">
+        <h3 style="color:var(--neon); font-family:'Orbitron'; font-size:0.8rem; margin-bottom:15px;">CYBER MARKET (L1-L5)</h3>
+        <div id="market-container"></div>
     </div>
 
     <div id="scr-nodes" class="screen">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="color:var(--neon-blue); font-family:'Orbitron'; font-size:1rem;">MINING GRID</h3>
-            <div id="nodes-count" style="font-size:0.65rem; color:var(--gold);">0/16 UNITS</div>
-        </div>
-
-        <div class="grid-container" id="mining-grid"></div>
-
-        <div style="margin-top:20px;">
-            <button class="btn-cyber" id="btn-buy-core" style="width:100%; padding:15px; font-size:0.9rem;" onclick="buyBaseCore()">
-                BUY BASE UNIT (0.100 LC)
-            </button>
-            <p style="font-size:0.55rem; color:#666; text-align:center; margin-top:10px; line-height:1.4;">
-                * ТОРКНІТЬСЯ ЯДРА, ПОТІМ ІНШОГО ТАКОГО Ж РІВНЯ ДЛЯ MERGE.<br>
-                КОЖЕН РІВЕНЬ ПРИСКОРЮЄ МАЙНІНГ У 2.5 РАЗИ.
-            </p>
-        </div>
-    </div>
-
-    <div id="scr-wallet" class="screen">
-        <h3 style="color:var(--neon-blue); font-family:'Orbitron'; font-size:1rem;">FINANCIAL HUB</h3>
-        <button class="btn-cyber" id="wallet-btn" style="width:100%; padding:15px; margin-bottom:20px;" onclick="connectWallet()">CONNECT WALLET</button>
-        
-        <div class="cyber-card" style="flex-direction:column; align-items:flex-start; gap:12px;">
-            <div style="font-size:0.6rem; color:#888;">SYNC KLYN TO LUMISCOIN (10,000 : 1)</div>
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                <span id="swap-klyn-val" style="color:var(--neon-blue); font-size:1.4rem; font-family:'Orbitron'">0</span>
-                <button class="btn-cyber" onclick="swapKlyn()">PROCESS</button>
-            </div>
-        </div>
-
-        <div class="cyber-card" style="border-color:var(--gold); margin-top:15px; background: rgba(243,186,47,0.05);">
-            <div>
-                <div style="font-size:0.6rem; color:#888;">TOTAL LUMISCOIN (LC)</div>
-                <div class="bal-val" id="lumis-bal" style="font-size:1.6rem;">0.00000</div>
-            </div>
-            <div style="text-align:right;">
-                <span id="mining-status" style="color:var(--green); font-size:0.55rem; display:block;">● ACTIVE</span>
-            </div>
-        </div>
+        <h3 style="color:var(--neon); font-family:'Orbitron'; font-size:0.8rem; margin-bottom:15px;">HARDWARE NODES</h3>
+        <div id="nodes-container"></div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="nav('scr-main', this)"><i>🏠</i>CORE</div>
-        <div class="nav-item" onclick="nav('scr-earn', this)"><i>📡</i>LINKS</div>
-        <div class="nav-item" onclick="nav('scr-nodes', this)"><i>⚡</i>GRID</div>
-        <div class="nav-item" onclick="nav('scr-wallet', this)"><i>👛</i>VAULT</div>
+        <div class="nav-btn active" onclick="tab('scr-factory', this)"><i>⚙️</i>FACTORY</div>
+        <div class="nav-btn" onclick="tab('scr-market', this)"><i>🛒</i>MARKET</div>
+        <div class="nav-btn" onclick="tab('scr-nodes', this)"><i>⚡</i>NODES</div>
     </nav>
 
     <script>
-        // ІНСТРУКЦІЯ: Цей скрипт керує всією логікою гри
+        // Конфігурація іконок
+        const icons = ["🔌", "🤖", "🦾", "🛡️", "🚀", "🛰️", "⚡", "💠", "⚛️", "🧬", "🔮", "🌌", "🧠", "🔥", "💎", "👑"];
+        
         let state = {
-            klyn: parseFloat(localStorage.getItem('L_KLYN')) || 0,
-            lumis: parseFloat(localStorage.getItem('L_LUMIS')) || 0,
-            hp: parseFloat(localStorage.getItem('L_HP')) || 0,
-            en: parseFloat(localStorage.getItem('L_EN')) || 1000,
-            maxEn: 1000,
-            wallet: localStorage.getItem('L_WALT') || null,
-            grid: JSON.parse(localStorage.getItem('L_GRID')) || Array(16).fill(null)
+            lumis: parseFloat(localStorage.getItem('L_BAL')) || 0.1,
+            hp: 0,
+            energy: 100,
+            grid: JSON.parse(localStorage.getItem('L_GRID')) || Array(16).fill(null),
+            marketData: []
         };
 
-        const icons = ["🔌", "⚡", "🔮", "🌌", "💠", "⚛️", "🧬", "👑"];
-        let firstSelected = null;
+        let selectedIdx = null;
 
-        // BOOT SEQUENCE
-        const boot = document.getElementById('boot-screen');
-        ["DECRYPTING...","SYNCING GRID...","CORE LOADED."].forEach((t, i) => {
-            setTimeout(() => { 
-                boot.innerHTML += `<p style="margin:5px 0">> ${t}</p>`; 
-                if(i===2) setTimeout(()=>boot.style.display='none', 800); 
-            }, i*500);
-        });
+        // Завантаження JSON
+        async function initData() {
+            try {
+                const res = await fetch('data.json');
+                const data = await res.json();
+                state.marketData = data.cyber_market;
+                renderMarket();
+                renderNodes(data.hardware_nodes);
+            } catch(e) { console.log("JSON not loaded, using defaults"); }
+        }
 
         function updateUI() {
-            document.getElementById('klyn-bal').innerText = Math.floor(state.klyn).toLocaleString();
-            document.getElementById('swap-klyn-val').innerText = Math.floor(state.klyn).toLocaleString();
+            document.getElementById('lumis-display').innerText = state.lumis.toFixed(5);
+            document.getElementById('hp-display').innerText = `⚡ ${state.hp.toFixed(5)} H/H`;
+            document.getElementById('en-fill').style.width = state.energy + '%';
+            document.getElementById('en-text').innerText = `ENERGY: ${Math.floor(state.energy)}/100`;
             
-            // Відображаємо 5 знаків для видимості майнінгу
-            const lStr = state.lumis.toFixed(5);
-            document.getElementById('lumis-bal').innerText = lStr;
-            document.getElementById('top-bal').innerText = lStr;
-            
-            document.getElementById('hp-display').innerText = `⚡ ${state.hp.toFixed(5)} HP/H`;
-            document.getElementById('energy-fill').style.width = (state.en / state.maxEn * 100) + '%';
-            document.getElementById('energy-text').innerText = `${Math.floor(state.en)}/${state.maxEn}`;
-            
-            if(state.wallet) document.getElementById('wallet-btn').innerText = "ADDR: " + state.wallet.substring(0,8).toUpperCase();
-            
-            // Save
-            localStorage.setItem('L_KLYN', state.klyn);
-            localStorage.setItem('L_LUMIS', state.lumis);
-            localStorage.setItem('L_HP', state.hp);
-            localStorage.setItem('L_EN', state.en);
+            localStorage.setItem('L_BAL', state.lumis);
             localStorage.setItem('L_GRID', JSON.stringify(state.grid));
-
-            // Button state
-            document.getElementById('btn-buy-core').disabled = state.lumis < 0.1;
         }
 
-        // GRID RENDERING
+        function spawnFromBox() {
+            const free = state.grid.indexOf(null);
+            if(state.energy >= 10 && free !== -1) {
+                state.energy -= 10;
+                state.grid[free] = 1;
+                recalculate(); renderGrid(); updateUI();
+            }
+        }
+
         function renderGrid() {
-            const container = document.getElementById('mining-grid');
-            container.innerHTML = '';
-            let activeCount = 0;
-
-            state.grid.forEach((lvl, idx) => {
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = '';
+            state.grid.forEach((lvl, i) => {
                 const cell = document.createElement('div');
-                cell.className = 'grid-cell' + (lvl ? ' active' : '');
-                if(firstSelected === idx) cell.classList.add('selected');
-                
-                cell.onclick = () => handleCellClick(idx);
-                
-                if (lvl) {
-                    activeCount++;
-                    cell.innerHTML = `
-                        <span class="core-icon">${icons[lvl-1] || "🚀"}</span>
-                        <span class="core-lvl">LVL ${lvl}</span>
-                    `;
-                }
-                container.appendChild(cell);
+                cell.className = `slot ${lvl ? 'occupied' : ''} ${selectedIdx === i ? 'selected' : ''}`;
+                cell.onclick = () => handleMerge(i);
+                if(lvl) cell.innerHTML = `${icons[(lvl-1)%icons.length]} <span class="lvl-tag">L${lvl}</span>`;
+                grid.appendChild(cell);
             });
-            document.getElementById('nodes-count').innerText = `${activeCount}/16 UNITS`;
         }
 
-        function handleCellClick(idx) {
-            if (firstSelected === null) {
-                if (state.grid[idx] !== null) {
-                    firstSelected = idx;
-                    renderGrid();
-                }
+        function handleMerge(i) {
+            if(selectedIdx === null) {
+                if(state.grid[i]) selectedIdx = i;
             } else {
-                if (idx !== firstSelected && state.grid[idx] === state.grid[firstSelected] && state.grid[idx] !== null) {
-                    // MERGE SUCCESS
-                    state.grid[idx] += 1;
-                    state.grid[firstSelected] = null;
-                    firstSelected = null;
-                    recalculateHP();
-                    renderGrid();
-                    updateUI();
+                if(i !== selectedIdx && state.grid[i] === state.grid[selectedIdx] && state.grid[i]) {
+                    state.grid[i]++;
+                    state.grid[selectedIdx] = null;
+                    selectedIdx = null;
+                    recalculate();
                 } else {
-                    firstSelected = (state.grid[idx] !== null) ? idx : null;
-                    renderGrid();
+                    selectedIdx = state.grid[i] ? i : null;
                 }
             }
+            renderGrid(); updateUI();
         }
 
-        function buyBaseCore() {
-            const emptyIdx = state.grid.indexOf(null);
-            if (state.lumis >= 0.1 && emptyIdx !== -1) {
-                state.lumis -= 0.1;
-                state.grid[emptyIdx] = 1;
-                recalculateHP();
-                renderGrid();
-                updateUI();
+        function renderMarket() {
+            const cont = document.getElementById('market-container');
+            cont.innerHTML = '';
+            state.marketData.forEach(item => {
+                cont.innerHTML += `
+                    <div class="shop-item">
+                        <div style="font-size:1.5rem;">${item.icon}</div>
+                        <div style="flex:1; margin-left:15px;"><b>${item.name}</b><br><small>+${item.income} H/H</small></div>
+                        <button class="buy-btn" onclick="buyUnit(${item.lvl}, ${item.cost})" ${state.lumis < item.cost ? 'disabled' : ''}>${item.cost} LC</button>
+                    </div>`;
+            });
+        }
+
+        function buyUnit(lvl, cost) {
+            const free = state.grid.indexOf(null);
+            if(state.lumis >= cost && free !== -1) {
+                state.lumis -= cost; state.grid[free] = lvl;
+                recalculate(); renderGrid(); renderMarket(); updateUI();
             }
         }
 
-        function recalculateHP() {
+        function recalculate() {
             let total = 0;
-            state.grid.forEach(lvl => {
-                if(lvl) total += 0.05 * Math.pow(2.5, lvl-1);
-            });
+            state.grid.forEach(lvl => { if(lvl) total += 0.05 * Math.pow(2.2, lvl-1); });
             state.hp = total;
         }
 
-        // ACTIONS
-        document.getElementById('tap-target').addEventListener('pointerdown', (e) => {
-            if(state.en >= 1) { 
-                state.klyn += 1; state.en -= 1; 
-                updateUI(); pop(e.clientX, e.clientY); 
-            }
-        });
-
-        function pop(x,y) {
-            const p = document.createElement('div'); p.className='floating-text'; p.innerText='+1';
-            p.style.left=x+'px'; p.style.top=y+'px';
-            document.body.appendChild(p); setTimeout(()=>p.remove(), 600);
-        }
-
-        function swapKlyn() {
-            if(state.klyn >= 100) {
-                let gained = state.klyn / 10000;
-                state.lumis += gained; state.klyn = 0;
-                updateUI();
-            }
-        }
-
-        function connectWallet() {
-            const addr = "0x" + Math.random().toString(16).slice(2,12);
-            state.wallet = addr; localStorage.setItem('L_WALT', addr); updateUI();
-        }
-
-        function copyRef() {
-            const link = "https://lumis.io/join?ref=" + (state.wallet || "user_" + Date.now().toString().slice(-6));
-            navigator.clipboard.writeText(link);
-            alert("REFERRAL LINK COPIED!");
-        }
-
-        function nav(id, el) {
+        function tab(id, el) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active-screen'); 
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active-screen');
             el.classList.add('active');
-            if(id === 'scr-earn') loadLinks();
+            if(id === 'scr-market') renderMarket();
         }
 
-        async function loadLinks() {
-            try {
-                const res = await fetch('data.json');
-                const d = await res.json();
-                const cont = document.getElementById('links-container');
-                cont.innerHTML = '';
-                d.links.forEach(l => {
-                    cont.innerHTML += `<div class="cyber-card"><div><b>${l.icon} ${l.name}</b><br><span style="color:var(--green);font-size:0.6rem;">+${l.reward} KLYN</span></div><button class="btn-cyber" onclick="window.open('${l.url}','_blank')">GO</button></div>`;
-                });
-            } catch(e) { console.log("JSON not found, check data.json file."); }
-        }
-
-        // CORE LOOP
+        // Цикл нарахування
         setInterval(() => {
-            if(state.hp > 0) {
-                state.lumis += (state.hp / 3600);
-                // Visual Pulse
-                document.getElementById('mining-status').style.opacity = (Math.sin(Date.now()/300) * 0.5) + 0.5;
-            }
-            if(state.en < state.maxEn) state.en += 1.5; // Реген
+            if(state.hp > 0) state.lumis += (state.hp / 3600);
+            if(state.energy < 100) state.energy += 0.5;
             updateUI();
         }, 1000);
 
-        // INIT
-        recalculateHP();
+        initData();
+        recalculate();
         renderGrid();
         updateUI();
     </script>
