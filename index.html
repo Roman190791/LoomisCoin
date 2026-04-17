@@ -2,170 +2,238 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis Ecosystem</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LumisCoin Alpha</title>
     <style>
-        :root { --neon: #00f2ff; --gold: #ffcc00; --dark: #050505; --card: #111; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* HEADER */
-        .header { padding: 15px; background: #000; border-bottom: 1px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
-        #top-l { color: var(--neon); font-size: 18px; font-weight: bold; }
-        #top-k { color: var(--gold); font-size: 13px; }
+        :root {
+            --binance-gold: #f3ba2f;
+            --klyn-green: #00ff88;
+            --bg-dark: #0b0e11;
+            --card-bg: rgba(255, 255, 255, 0.07);
+        }
 
-        .content { flex: 1; position: relative; display: flex; overflow-y: auto; }
-        .page { display: none; flex: 1; padding: 20px; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; }
-        .active-page { display: flex; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-        /* ADVANCED SVG COIN */
-        .coin-wrapper { margin: 30px 0; cursor: pointer; transition: transform 0.1s; -webkit-tap-highlight-color: transparent; }
-        .coin-wrapper:active { transform: scale(0.92); }
+        /* Головний екран */
+        #game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
 
-        /* UI ELEMENTS */
-        .card { background: var(--card); border: 1px solid #222; padding: 15px; border-radius: 12px; width: 100%; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; }
-        .btn-main { background: none; border: 2px solid var(--gold); color: var(--gold); width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-small { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none; }
+        .balance-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
 
-        /* NAVIGATION */
-        .nav { display: flex; background: #000; border-top: 1px solid #222; padding: 10px 0 25px 0; }
-        .nav-item { flex: 1; text-align: center; font-size: 9px; color: #444; cursor: pointer; transition: 0.2s; }
-        .nav-item.active { color: var(--neon); }
-        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+        .balance-card h2 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #aaa;
+            text-transform: uppercase;
+        }
 
-        /* LEADERBOARD STYLES */
-        .rank-item { display: flex; align-items: center; width: 100%; padding: 10px; border-bottom: 1px solid #222; }
-        .rank-num { width: 30px; color: var(--gold); font-weight: bold; }
-        .rank-name { flex: 1; margin-left: 10px; }
+        #balance {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--binance-gold);
+            text-shadow: 0 0 15px rgba(243, 186, 47, 0.3);
+        }
 
-        .tap-text { position: absolute; color: var(--neon); font-weight: bold; pointer-events: none; animation: fly 0.6s forwards; z-index: 100; }
-        @keyframes fly { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-120px); } }
+        /* Велика Кнопка */
+        .main-tap-area {
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, #f3ba2f 0%, #d4a017 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            cursor: pointer;
+            box-shadow: 0 0 50px rgba(243, 186, 47, 0.4);
+            transition: transform 0.1s;
+            user-select: none;
+            border: 8px solid rgba(255,255,255,0.1);
+        }
+
+        .main-tap-area:active {
+            transform: scale(0.92);
+        }
+
+        /* Секції (Завдання, Ферми і т.д.) */
+        .page-content {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: var(--bg-dark);
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .active-page { display: block; animation: slideUp 0.3s ease-out; }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Картки Завдань */
+        .quest-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--binance-gold);
+        }
+
+        .quest-info h3 { margin: 0; font-size: 1rem; color: var(--binance-gold); }
+        .quest-info p { margin: 5px 0; font-size: 0.8rem; color: #ccc; }
+        .reward-badge { color: var(--klyn-green); font-weight: bold; font-size: 0.9rem; }
+
+        .btn-action {
+            background: var(--binance-gold);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Навігація */
+        .nav-bar {
+            height: 70px;
+            background: rgba(11, 14, 17, 0.95);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            z-index: 20;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .nav-item.active { color: var(--binance-gold); }
+        .nav-item span { font-size: 1.4rem; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="stats">
-            <b id="top-l">0.00 LUMIS</b>
-            <b id="top-k">0 KLYN</b>
+    <div id="game-container">
+        <div class="balance-card">
+            <h2>Твій баланс</h2>
+            <div id="balance">1000</div>
+            <div style="font-size: 0.8rem; color: var(--klyn-green);">KLYN Tokens</div>
         </div>
-        <div style="text-align: right; color: var(--neon); font-size: 10px;">CORE PROTOCOL<br>ACTIVE</div>
+        
+        <div class="main-tap-area" onclick="tapMe()">🟡</div>
+        <p style="margin-top: 20px; color: #666;">Тайпай, щоб заробляти</p>
     </div>
 
-    <div class="content">
-        <div id="p-mining" class="page active-page">
-            <div class="coin-wrapper" onclick="handleTap(event)">
-                <svg width="240" height="240" viewBox="0 0 200 200">
-                    <defs>
-                        <radialGradient id="goldGrad" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" style="stop-color:#ffeb3b;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#f57f17;stop-opacity:1" />
-                        </radialGradient>
-                    </defs>
-                    <circle cx="100" cy="100" r="95" fill="url(#goldGrad)" stroke="#ffcc00" stroke-width="4"/>
-                    <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
-                    <path id="circlePath" d="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" fill="none"/>
-                    <text font-size="12" fill="#333" font-weight="bold">
-                        <textPath xlink:href="#circlePath">LUMIS COIN • DIGITAL ASSET • LUMIS COIN • </textPath>
-                    </text>
-                    <g transform="translate(65, 60) scale(0.15)" fill="#222">
-                        <path d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208z"/>
-                        <path d="M352 192h-48v-32c0-8.8-7.2-16-16-16h-64c-8.8 0-16 7.2-16 16v32h-48c-17.7 0-32 14.3-32 32v128c0 17.7 14.3 32 32 32h192c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32zm-80 128h-32v-32h32v32z"/>
-                    </g>
-                    <text x="100" y="165" text-anchor="middle" font-size="14" fill="#000" font-weight="bold" font-family="Arial">LUMIS</text>
-                </svg>
+    <div id="quests-page" class="page-content">
+        <h1 style="text-align: center;">Завдання</h1>
+        
+        <div class="quest-card">
+            <div class="quest-info">
+                <h3>Приєднатися до Telegram</h3>
+                <p>Будь у курсі всіх новин проекту</p>
+                <div class="reward-badge">+2000 KLYN</div>
             </div>
-            <button class="btn-main" onclick="sync()">СИНТЕЗ (1000 KLYN ➔ 0.1 L)</button>
+            <button class="btn-action" onclick="window.open('https://t.me/ТВОЯ_ГРУПА', '_blank')">Йти</button>
         </div>
 
-        <div id="p-tasks" class="page">
-            <h2 style="color:var(--neon)">ЗАВДАННЯ</h2>
-            <div id="tasks-list" style="width:100%"></div>
-        </div>
-
-        <div id="p-leader" class="page">
-            <h2 style="color:var(--gold)">TOP PLAYERS</h2>
-            <div class="rank-item"><span class="rank-num">1</span><span class="rank-name">Cyber_Lumis</span><span>1420 L</span></div>
-            <div class="rank-item"><span class="rank-num">2</span><span class="rank-name">Alex_AI</span><span>980 L</span></div>
-            <div class="rank-item"><span class="rank-num">3</span><span class="rank-name">User_771</span><span>540 L</span></div>
-            <div style="margin-top:20px; color:#555">Твій ранг: #402</div>
-        </div>
-
-        <div id="p-wallet" class="page">
-            <h2 style="color:var(--neon)">ГАМАНЕЦЬ</h2>
-            <div class="card" style="flex-direction: column; align-items: flex-start;">
-                <span style="color:#666">Твій баланс:</span>
-                <span style="font-size: 28px; color: var(--gold); margin: 10px 0;" id="w-l">0.00 L</span>
-                <span style="color:var(--neon)" id="w-usdt">≈ 0.00 USDT</span>
-            </div>
-            <button class="btn-main" style="background:var(--gold); color:black">WITHDRAW</button>
-        </div>
-
-        <div id="p-acc" class="page">
-            <h2 style="color:var(--neon)">ПРОФІЛЬ</h2>
-            <div class="card"><span>ID:</span><span id="u-id">#55012</span></div>
-            <div class="card"><span>Статус:</span><span style="color:var(--neon)">Майнер (Hybrid)</span></div>
-            <div class="card"><span>Швидкість:</span><span id="p-r">+0/s</span></div>
-        </div>
+        <div id="dynamic-quests"></div>
     </div>
 
-    <div class="nav">
-        <div class="nav-item" onclick="tab('p-tasks', this)"><span class="nav-icon">📋</span>ЗАВДАННЯ</div>
-        <div class="nav-item" onclick="tab('p-leader', this)"><span class="nav-icon">🏆</span>ЛІДЕРБОРД</div>
-        <div class="nav-item active" onclick="tab('p-mining', this)"><span class="nav-icon">⛏</span>МАЙНІНГ</div>
-        <div class="nav-item" onclick="tab('p-wallet', this)"><span class="nav-icon">👛</span>ГАМАНЕЦЬ</div>
-        <div class="nav-item" onclick="tab('p-acc', this)"><span class="nav-icon">👤</span>ПРОФІЛЬ</div>
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showPage('main')"><span>🏠</span>Головна</div>
+        <div class="nav-item" onclick="showPage('quests')"><span>📜</span>Завдання</div>
+        <div class="nav-item" onclick="alert('Скоро!')"><span>🚜</span>Ферми</div>
+        <div class="nav-item" onclick="alert('Твоє посилання: ...')"><span>👥</span>Друзі</div>
     </div>
 
     <script>
-        let k = parseFloat(localStorage.getItem('lm_k_v10')) || 0;
-        let l = parseFloat(localStorage.getItem('lm_l_v10')) || 0;
-        let r = parseInt(localStorage.getItem('lm_r_v10')) || 0;
+        let balance = 1000;
 
-        async function loadData() {
+        function tapMe() {
+            balance += 1;
+            document.getElementById('balance').innerText = balance;
+        }
+
+        function showPage(page) {
+            // Приховуємо всі сторінки
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
+            
+            if (page === 'quests') {
+                document.getElementById('quests-page').classList.add('active-page');
+                loadQuests(); // Завантажуємо дані з JSON при відкритті
+            }
+        }
+
+        async function loadQuests() {
+            const container = document.getElementById('dynamic-quests');
+            container.innerHTML = '<p style="text-align:center">Завантаження партнерських програм...</p>';
+
             try {
-                const res = await fetch('data.json');
-                const data = await res.json();
-                const tL = document.getElementById('tasks-list'); tL.innerHTML = '';
-                data.tasks.forEach(t => {
-                    tL.innerHTML += `<div class="card"><div><b>${t.name}</b><br><small>+${t.reward} KLYN</small></div><a href="${t.url}" target="_blank" class="btn-small">GO</a></div>`;
+                // Міняємо на пряме посилання на твій файл на GitHub
+                const response = await fetch('data.json'); 
+                const data = await response.json();
+                
+                container.innerHTML = ''; // Очищуємо текст завантаження
+
+                data.quests.forEach(q => {
+                    const card = document.createElement('div');
+                    card.className = 'quest-card';
+                    card.innerHTML = `
+                        <div class="quest-info">
+                            <h3>${q.title}</h3>
+                            <p>${q.description}</p>
+                            <div class="reward-badge">+${q.reward} KLYN</div>
+                        </div>
+                        <button class="btn-action" onclick="window.open('${q.link}', '_blank')">${q.button_text}</button>
+                    `;
+                    container.appendChild(card);
                 });
-            } catch (e) { console.log("JSON Error"); }
+            } catch (e) {
+                container.innerHTML = '<p style="color:red">Помилка завантаження партнерських завдань.</p>';
+            }
         }
-
-        function refresh() {
-            document.getElementById('top-k').innerText = Math.floor(k) + " KLYN";
-            document.getElementById('top-l').innerText = l.toFixed(2) + " LUMIS";
-            document.getElementById('w-l').innerText = l.toFixed(2) + " L";
-            document.getElementById('w-usdt').innerText = "≈ " + (l * 0.55).toFixed(2) + " USDT";
-            document.getElementById('p-r').innerText = "+" + r + "/s";
-            localStorage.setItem('lm_k_v10', k);
-            localStorage.setItem('lm_l_v10', l);
-            localStorage.setItem('lm_r_v10', r);
-        }
-
-        function handleTap(e) {
-            k += 1;
-            const d = document.createElement('div');
-            d.className = 'tap-text'; d.innerText = '+1';
-            d.style.left = e.clientX + 'px'; d.style.top = e.clientY + 'px';
-            document.body.appendChild(d);
-            setTimeout(() => d.remove(), 600);
-            refresh();
-        }
-
-        function sync() { if(k >= 1000) { k -= 1000; l += 0.1; refresh(); } else { alert("Мало KLYN!"); } }
-
-        function tab(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active-page');
-            el.classList.add('active');
-        }
-
-        setInterval(() => { if(r > 0) { k += r; refresh(); } }, 1000);
-        loadData(); refresh();
-        Telegram.WebApp.expand();
     </script>
 </body>
 </html>
+
