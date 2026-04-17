@@ -3,61 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis Ecosystem</title>
+    <title>Lumis Dynamic</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --neon: #00f2ff;
-            --gold: #ffcc00;
-            --dark: #050505;
-            --card-bg: #111111;
-        }
-        body { 
-            font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; 
-            margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-        }
-        
-        /* HEADER */
+        :root { --neon: #00f2ff; --gold: #ffcc00; --dark: #050505; --card-bg: #111; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         .header { padding: 15px; background: #000; border-bottom: 1px solid var(--neon); display: flex; justify-content: space-between; align-items: center; }
-        .stats div { font-size: 14px; font-weight: bold; }
-
-        /* CONTENT */
-        .content { flex: 1; display: flex; position: relative; }
-        .page { display: none; flex: 1; padding: 20px; flex-direction: column; align-items: center; overflow-y: auto; width: 100%; box-sizing: border-box; }
+        #top-l { color: var(--neon); font-size: 18px; font-weight: bold; }
+        #top-k { color: var(--gold); font-size: 14px; font-weight: bold; }
+        .income-info { font-size: 10px; color: var(--neon); opacity: 0.8; }
+        .content { flex: 1; display: flex; position: relative; overflow-y: auto; }
+        .page { display: none; flex: 1; padding: 20px; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; }
         .active-page { display: flex; }
-
-        /* ЦЕНТРАЛЬНА МОНЕТА (БЕЗ КАРТИНКИ) */
-        .main-coin {
-            width: 220px; height: 220px; border-radius: 50%;
-            background: radial-gradient(circle, #222 0%, #000 100%);
-            border: 4px solid var(--neon);
-            box-shadow: 0 0 25px rgba(0, 242, 255, 0.3);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 80px; cursor: pointer; transition: transform 0.05s;
-            margin: 40px 0; user-select: none;
-        }
+        .main-coin { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #222 0%, #000 100%); border: 4px solid var(--neon); box-shadow: 0 0 25px rgba(0, 242, 255, 0.3); display: flex; align-items: center; justify-content: center; font-size: 70px; cursor: pointer; transition: transform 0.05s; margin: 30px 0; user-select: none; }
         .main-coin:active { transform: scale(0.95); }
         .main-coin::after { content: "L"; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
-
-        /* UI ELEMENTS */
-        .card { 
-            background: var(--card-bg); border: 1px solid #222; padding: 15px; 
-            border-radius: 12px; width: 100%; margin: 8px 0; box-sizing: border-box;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn-action { 
-            background: transparent; border: 1px solid var(--neon); color: var(--neon); 
-            padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;
-        }
-        .btn-sync { border-color: var(--gold); color: var(--gold); width: 100%; padding: 15px; margin-top: 20px; font-size: 16px; }
-
-        /* NAVIGATION */
+        .card { background: var(--card-bg); border: 1px solid #222; padding: 15px; border-radius: 12px; width: 100%; margin: 8px 0; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
+        .farm-info { text-align: left; }
+        .farm-info strong { color: var(--neon); display: block; margin-bottom: 4px; }
+        .farm-info small { color: #888; }
+        .btn-buy { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; text-decoration: none; text-align: center; }
+        .btn-sync { background: none; border: 2px solid var(--gold); color: var(--gold); width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; margin-top: 10px; cursor: pointer; }
         .nav { display: flex; background: #000; border-top: 1px solid #222; padding: 10px 0 25px 0; }
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: #444; cursor: pointer; }
         .nav-item.active { color: var(--neon); }
         .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
-
-        /* ANIMATION */
         .tap-anim { position: absolute; color: var(--neon); font-weight: bold; animation: fly 0.6s forwards; pointer-events: none; }
         @keyframes fly { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-100px); } }
     </style>
@@ -66,69 +36,80 @@
 
     <div class="header">
         <div class="stats">
-            <div style="color:var(--neon)" id="top-l">0.00 LUMIS</div>
-            <div style="color:var(--gold)" id="top-k">0 KLYN</div>
+            <div id="top-l">0.00 LUMIS</div>
+            <div id="top-k">0 KLYN</div>
+            <div class="income-info">ПРИБУТОК: +<span id="income-rate">0</span>/SEC</div>
         </div>
-        <div style="font-size:10px; opacity:0.6">AI COMMUNITY</div>
+        <div style="font-size: 10px; text-align: right; color: var(--neon);">RANK: HYBRID</div>
     </div>
 
     <div class="content">
         <div id="p-game" class="page active-page">
             <div class="main-coin" onclick="handleTap(event)"></div>
-            <p style="color:#888">Генеруйте енергію KLYN тапами</p>
-            <button class="btn-action btn-sync" onclick="syncLumis()">СИНТЕЗ (1000 KLYN ➔ 0.1 L)</button>
+            <button class="btn-sync" onclick="syncLumis()">СИНТЕЗ (1000 KLYN ➔ 0.1 L)</button>
         </div>
 
         <div id="p-farms" class="page">
-            <h2 style="color:var(--neon)">МАЙНІНГ ФЕРМИ</h2>
-            <p style="color:#666; font-size:12px">Активуйте пасивний дохід</p>
-            <div class="card">
-                <div>Процесор v1 (+1/с)<br><small>Ціна: 0.50 LUMIS</small></div>
-                <button class="btn-action" onclick="buyFarm(0.5, 1)">BUY</button>
-            </div>
-            <div class="card">
-                <div>AI Кластер (+5/с)<br><small>Ціна: 2.00 LUMIS</small></div>
-                <button class="btn-action" onclick="buyFarm(2.0, 5)">BUY</button>
-            </div>
+            <h2 style="color:var(--neon)">AI ФЕРМИ</h2>
+            <div id="farms-list" style="width: 100%;"></div>
         </div>
 
         <div id="p-tasks" class="page">
             <h2 style="color:var(--neon)">КВЕСТИ</h2>
-            <div class="card">
-                <div>Підписка на канал<br><small>Нагорода: +500 KLYN</small></div>
-                <button class="btn-action" onclick="alert('Перевірка...')">GO</button>
-            </div>
+            <div id="tasks-list" style="width: 100%;"></div>
         </div>
 
         <div id="p-acc" class="page">
-            <h2 style="color:var(--neon)">АККАУНТ ГІБРИДА</h2>
-            <div class="card"><span>KLYN Баланс:</span><span id="p-k">0</span></div>
-            <div class="card"><span>LUMIS Баланс:</span><span id="p-l">0.00</span></div>
-            <button class="btn-action" style="width:100%; background:var(--neon); color:black; margin-top:20px" onclick="alert('Гаманець у розробці')">ПІДКЛЮЧИТИ ГАМАНЕЦЬ</button>
+            <h2 style="color:var(--neon)">ПРОФІЛЬ</h2>
+            <div class="card"><span>KLYN Баланс:</span><b id="p-k">0</b></div>
+            <div class="card"><span>LUMIS Баланс:</span><b id="p-l">0.00</b></div>
+            <div class="card"><span>Швидкість:</span><b style="color: var(--neon);">+<span id="p-r">0</span>/с</b></div>
         </div>
     </div>
 
     <div class="nav">
         <div class="nav-item active" onclick="switchTab('p-game', this)"><span class="nav-icon">🎮</span>СИНТЕЗ</div>
         <div class="nav-item" onclick="switchTab('p-farms', this)"><span class="nav-icon">⛏</span>ФЕРМИ</div>
-        <div class="nav-item" onclick="switchTab('p-tasks', this)"><span class="nav-icon">📋</span>ЗАВДАННЯ</div>
+        <div class="nav-item" onclick="switchTab('p-tasks', this)"><span class="nav-icon">📋</span>КВЕСТИ</div>
         <div class="nav-item" onclick="switchTab('p-acc', this)"><span class="nav-icon">👤</span>ПРОФІЛЬ</div>
     </div>
 
     <script>
-        let k = parseFloat(localStorage.getItem('lm_k')) || 0;
-        let l = parseFloat(localStorage.getItem('lm_l')) || 0;
-        let r = parseInt(localStorage.getItem('lm_r')) || 0;
+        let k = parseFloat(localStorage.getItem('lm_k_dyn')) || 0;
+        let l = parseFloat(localStorage.getItem('lm_l_dyn')) || 0;
+        let r = parseInt(localStorage.getItem('lm_r_dyn')) || 0;
+
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+                
+                // Рендеримо Ферми
+                const fList = document.getElementById('farms-list');
+                fList.innerHTML = '';
+                data.farms.forEach(f => {
+                    fList.innerHTML += `<div class="card"><div class="farm-info"><strong>${f.name}</strong><small>${f.desc}</small></div><button class="btn-buy" onclick="buyFarm(${f.price}, ${f.add})">${f.price} L</button></div>`;
+                });
+
+                // Рендеримо Квести
+                const tList = document.getElementById('tasks-list');
+                tList.innerHTML = '';
+                data.tasks.forEach(t => {
+                    tList.innerHTML += `<div class="card"><div class="farm-info"><strong>${t.name}</strong><small>+${t.reward} KLYN</small></div><a href="${t.url}" target="_blank" class="btn-buy" style="border-color:var(--neon); color:var(--neon);">GO</a></div>`;
+                });
+            } catch (e) { console.error("Помилка завантаження JSON", e); }
+        }
 
         function refresh() {
             document.getElementById('top-k').innerText = Math.floor(k) + " KLYN";
             document.getElementById('top-l').innerText = l.toFixed(2) + " LUMIS";
+            document.getElementById('income-rate').innerText = r;
             document.getElementById('p-k').innerText = Math.floor(k);
             document.getElementById('p-l').innerText = l.toFixed(2);
-            
-            localStorage.setItem('lm_k', k);
-            localStorage.setItem('lm_l', l);
-            localStorage.setItem('lm_r', r);
+            document.getElementById('p-r').innerText = r;
+            localStorage.setItem('lm_k_dyn', k);
+            localStorage.setItem('lm_l_dyn', l);
+            localStorage.setItem('lm_r_dyn', r);
         }
 
         function handleTap(e) {
@@ -142,6 +123,15 @@
             refresh();
         }
 
+        function buyFarm(price, add) {
+            if (l >= price) { l -= price; r += add; refresh(); }
+            else { alert("Мало LUMIS!"); }
+        }
+
+        function syncLumis() {
+            if (k >= 1000) { k -= 1000; l += 0.1; refresh(); }
+        }
+
         function switchTab(id, el) {
             document.querySelectorAll('.page').forEach(x => x.classList.remove('active-page'));
             document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
@@ -149,17 +139,9 @@
             el.classList.add('active');
         }
 
-        function syncLumis() {
-            if (k >= 1000) { k -= 1000; l += 0.1; refresh(); }
-            else { alert("Мало енергії KLYN!"); }
-        }
-
-        function buyFarm(cost, add) {
-            if (l >= cost) { l -= cost; r += add; refresh(); }
-            else { alert("Недостатньо LUMIS!"); }
-        }
-
         setInterval(() => { if(r > 0) { k += r; refresh(); } }, 1000);
+        
+        loadData();
         refresh();
         Telegram.WebApp.expand();
     </script>
