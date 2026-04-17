@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis Cyber-Dragon Legacy</title>
+    <title>Lumis Cyber-Dragon | Global Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap');
         :root { --gold: #f3ba2f; --neon: #00f2ff; --bg: #0b0e11; --card: rgba(255, 255, 255, 0.05); }
@@ -11,79 +11,94 @@
         body { background: var(--bg); color: white; font-family: 'JetBrains Mono', monospace; height: 100vh; overflow: hidden; }
 
         /* HEADER */
-        .header { height: 70px; background: #181a20; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
-        .stat-val { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; }
-        .stat-label { font-size: 0.5rem; color: #888; text-transform: uppercase; }
+        .header { height: 75px; background: #181a20; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10; position: relative; }
+        .stat-val { font-family: 'Orbitron'; color: var(--gold); font-size: 0.95rem; }
+        .stat-label { font-size: 0.55rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
 
-        .container { position: absolute; inset: 70px 0 85px 0; overflow-y: auto; padding: 15px; }
-        .screen { display: none; }
+        /* SCREENS */
+        .container { position: absolute; inset: 75px 0 85px 0; overflow-y: auto; padding: 15px; scrollbar-width: none; }
+        .container::-webkit-scrollbar { display: none; }
+        .screen { display: none; animation: fadeIn 0.3s ease; }
         .active-screen { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* FACTORY (Нова механіка) */
+        /* FACTORY CORE */
+        .factory-ui { text-align: center; margin-bottom: 20px; }
         .cyber-box { 
-            width: 120px; height: 120px; margin: 10px auto; background: radial-gradient(circle, var(--gold) 0%, transparent 75%);
-            border: 2px solid var(--gold); border-radius: 20px; display: flex; align-items: center; justify-content: center;
-            font-size: 3.5rem; cursor: pointer;
+            width: 120px; height: 120px; margin: 0 auto; background: radial-gradient(circle, var(--gold) 20%, transparent 70%);
+            border: 2px solid var(--gold); border-radius: 25px; display: flex; align-items: center; justify-content: center;
+            font-size: 3.5rem; cursor: pointer; transition: 0.1s; box-shadow: 0 0 15px rgba(243,186,47,0.2);
         }
-        .en-bar { width: 140px; height: 6px; background: #222; margin: 8px auto; border-radius: 3px; border: 1px solid var(--neon); overflow: hidden; }
+        .cyber-box:active { transform: scale(0.92); }
+        .energy-wrap { width: 160px; margin: 12px auto; }
+        .en-bar { height: 6px; background: #222; border-radius: 3px; border: 1px solid var(--neon); overflow: hidden; box-shadow: 0 0 10px rgba(0,242,255,0.1); }
         .en-fill { height: 100%; background: var(--neon); width: 100%; transition: 0.3s; }
-        .factory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 15px; }
-        .slot { aspect-ratio: 1; background: #181a20; border: 1px solid #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 1.5rem; }
-        .slot.occupied { border-color: var(--gold); }
-        .slot.selected { border-color: var(--neon); background: rgba(0,242,255,0.05); }
-        .lvl-badge { position: absolute; bottom: 2px; right: 2px; font-size: 0.5rem; color: var(--gold); background: #000; padding: 1px 3px; border-radius: 3px; }
 
-        /* Елементи списків */
-        .item-card { background: var(--card); border: 1px solid #333; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-action { background: var(--gold); color: black; border: none; padding: 8px 12px; border-radius: 6px; font-family: 'Orbitron'; font-weight: bold; font-size: 0.7rem; cursor: pointer; }
+        /* GRID */
+        .factory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 15px; border: 1px solid #2a2d33; }
+        .slot { aspect-ratio: 1; background: #181a20; border: 1px solid #333; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; font-size: 1.8rem; transition: 0.2s; }
+        .slot.occupied { border-color: var(--gold); background: rgba(243,186,47,0.03); }
+        .slot.selected { border-color: var(--neon); background: rgba(0,242,255,0.08); box-shadow: inset 0 0 10px var(--neon); }
+        .lvl-badge { position: absolute; bottom: 4px; right: 4px; font-size: 0.55rem; color: var(--gold); background: #000; padding: 1px 4px; border-radius: 4px; font-weight: bold; border: 1px solid var(--gold); }
 
-        /* Навігація */
-        .nav { height: 85px; background: #181a20; position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--gold); }
-        .nav-item { text-align: center; color: #555; font-size: 0.55rem; cursor: pointer; flex: 1; }
+        /* LIST ITEMS (Tasks, Nodes) */
+        .item-card { background: var(--card); border: 1px solid #333; padding: 14px; border-radius: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .item-info b { font-size: 0.85rem; color: #fff; }
+        .item-info small { color: var(--gold); font-size: 0.7rem; font-family: 'Orbitron'; }
+        .btn-action { background: var(--gold); color: black; border: none; padding: 10px 16px; border-radius: 8px; font-family: 'Orbitron'; font-weight: 700; font-size: 0.75rem; cursor: pointer; }
+        .btn-action:active { transform: scale(0.95); opacity: 0.8; }
+
+        /* NAVIGATION */
+        .nav { height: 85px; background: #181a20; position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--gold); padding: 0 5px; }
+        .nav-item { text-align: center; color: #555; font-size: 0.55rem; cursor: pointer; flex: 1; transition: 0.3s; font-weight: bold; }
         .nav-item.active { color: var(--gold); }
-        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+        .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="stat-box"><span class="stat-label">Power</span><br><span id="hp-val" class="stat-val">⚡ 0.00</span></div>
-        <div class="stat-box" style="text-align:right"><span class="stat-label">Lumis Vault</span><br><span id="bal-val" class="stat-val">0.000</span></div>
+        <div><span class="stat-label">Mining Power</span><br><span id="hp-val" class="stat-val">⚡ 0.00</span></div>
+        <div style="text-align:right"><span class="stat-label">Lumis Vault</span><br><span id="bal-val" class="stat-val">0.000</span></div>
     </div>
 
     <div class="container">
         <div id="scr-factory" class="screen active-screen">
-            <div style="text-align:center">
+            <div class="factory-ui">
                 <div class="cyber-box" onclick="spawnUnit()">📦</div>
-                <div class="en-bar"><div id="en-fill" class="en-fill"></div></div>
-                <div id="en-text" style="font-size:0.6rem; color:#888;">ENERGY: 100/100</div>
+                <div class="energy-wrap">
+                    <div class="en-bar"><div id="en-fill" class="en-fill"></div></div>
+                    <div id="en-text" style="font-size:0.6rem; color:#888; margin-top:5px;">ENERGY: 100/100</div>
+                </div>
             </div>
             <div class="factory-grid" id="grid"></div>
         </div>
 
         <div id="scr-tasks" class="screen">
-            <h3 style="margin-bottom:15px; color:var(--neon); font-size:0.9rem;">TASKS</h3>
+            <h3 style="margin: 0 0 15px 5px; color:var(--neon); font-size:1rem; font-family:'Orbitron';">CORE MISSIONS</h3>
             <div id="tasks-list"></div>
         </div>
 
         <div id="scr-nodes" class="screen">
-            <h3 style="margin-bottom:15px; color:var(--neon); font-size:0.9rem;">NODES</h3>
+            <h3 style="margin: 0 0 15px 5px; color:var(--neon); font-size:1rem; font-family:'Orbitron';">MINING HARDWARE</h3>
             <div id="nodes-list"></div>
         </div>
 
         <div id="scr-friends" class="screen">
-            <h3 style="margin-bottom:15px; color:var(--neon); font-size:0.9rem;">FRIENDS</h3>
-            <div class="item-card" style="flex-direction:column; align-items:flex-start;">
-                <p style="font-size:0.7rem; margin-bottom:10px;">Invite friends to get 10% bonus!</p>
-                <code style="background:#000; padding:8px; width:100%; font-size:0.6rem; border-radius:5px;">https://t.me/lumis_bot?start=user</code>
+            <h3 style="margin: 0 0 15px 5px; color:var(--neon); font-size:1rem; font-family:'Orbitron';">PARTNERS</h3>
+            <div class="item-card" style="flex-direction:column; align-items:center; gap:15px; padding:25px;">
+                <p style="font-size:0.75rem; text-align:center; color:#ccc;">Share your link and get 10% of their production!</p>
+                <code style="background:#000; padding:12px; width:100%; font-size:0.65rem; border-radius:8px; border:1px dashed var(--gold); color:var(--gold); text-align:center;">https://t.me/lumis_bot?start=user_id</code>
+                <button class="btn-action" style="width:100%">COPY LINK</button>
             </div>
         </div>
 
         <div id="scr-wallet" class="screen">
-            <h3 style="margin-bottom:15px; color:var(--neon); font-size:0.9rem;">WALLET</h3>
-            <div style="background:var(--card); padding:20px; border-radius:15px; text-align:center;">
-                <div id="w-bal" style="font-size:1.8rem; color:var(--gold); font-family:'Orbitron';">0.000</div>
-                <button class="btn-action" style="width:100%; margin-top:15px; padding:12px;">CONNECT WALLET</button>
+            <h3 style="margin: 0 0 15px 5px; color:var(--neon); font-size:1rem; font-family:'Orbitron';">FINANCE</h3>
+            <div style="background:var(--card); padding:30px; border-radius:20px; text-align:center; border:1px solid #333;">
+                <div style="font-size:0.6rem; color:#888; margin-bottom:10px;">TOTAL ASSETS</div>
+                <div id="w-bal" style="font-size:2rem; color:var(--gold); font-family:'Orbitron'; text-shadow: 0 0 15px rgba(243,186,47,0.3);">0.000</div>
+                <button class="btn-action" style="width:100%; margin-top:25px; padding:18px;">CONNECT TON WALLET</button>
             </div>
         </div>
     </div>
@@ -103,33 +118,46 @@
             hp: 0,
             energy: 100,
             grid: JSON.parse(localStorage.getItem('L_GRID')) || Array(16).fill(null),
-            nodeIncome: parseFloat(localStorage.getItem('L_NODE')) || 0
+            nodeIncome: parseFloat(localStorage.getItem('L_NODE')) || 0,
+            config: { cost: 10, l1: 0.05, regen: 0.4 }
         };
 
         let selected = null;
 
-        // ЗАВАНТАЖЕННЯ ДАНИХ (TASKS ТА NODES З ТВОГО JSON)
-        async function loadData() {
+        async function initGame() {
             try {
                 const res = await fetch('data.json');
                 const data = await res.json();
                 
-                if(data.tasks) {
-                    const tList = document.getElementById('tasks-list');
-                    tList.innerHTML = '';
-                    data.tasks.forEach(t => {
-                        tList.innerHTML += `<div class="item-card"><div><b>${t.title}</b><br><small>+${t.reward} LC</small></div><button class="btn-action" onclick="addMoney(${t.reward})">GO</button></div>`;
-                    });
-                }
-                
-                if(data.hardware_nodes) {
-                    const nList = document.getElementById('nodes-list');
-                    nList.innerHTML = '';
-                    data.hardware_nodes.forEach(n => {
-                        nList.innerHTML += `<div class="item-card"><div><b>${n.icon} ${n.name}</b><br><small>+${n.income} HP/H</small></div><button class="btn-action" onclick="buyNode(${n.cost}, ${n.income})">${n.cost} LC</button></div>`;
-                    });
-                }
-            } catch(e) { console.log("Waiting for data.json..."); }
+                // Рендер Завдань
+                const tList = document.getElementById('tasks-list');
+                tList.innerHTML = '';
+                data.tasks.forEach(t => {
+                    tList.innerHTML += `
+                        <div class="item-card">
+                            <div class="item-info"><b>${t.title}</b><br><small>+${t.reward} LC</small></div>
+                            <button class="btn-action" onclick="window.open('${t.link}', '_blank'); claim('${t.reward}')">GO</button>
+                        </div>`;
+                });
+
+                // Рендер Нод
+                const nList = document.getElementById('nodes-list');
+                nList.innerHTML = '';
+                data.hardware_nodes.forEach(n => {
+                    nList.innerHTML += `
+                        <div class="item-card">
+                            <div class="item-info"><b>${n.icon} ${n.name}</b><br><small>+${n.income} HP/H</small></div>
+                            <button class="btn-action" onclick="buyNode(${n.cost}, ${n.income})">${n.cost} LC</button>
+                        </div>`;
+                });
+
+                if(data.game_settings) state.config = { 
+                    cost: data.game_settings.box_energy_cost, 
+                    l1: data.game_settings.l1_income,
+                    regen: data.game_settings.energy_regen 
+                };
+            } catch(e) { console.error("JSON Error:", e); }
+            recalc(); renderGrid(); updateUI();
         }
 
         function updateUI() {
@@ -145,8 +173,9 @@
 
         function spawnUnit() {
             const free = state.grid.indexOf(null);
-            if(state.energy >= 10 && free !== -1) {
-                state.energy -= 10; state.grid[free] = 1;
+            if(state.energy >= state.config.cost && free !== -1) {
+                state.energy -= state.config.cost; 
+                state.grid[free] = 1;
                 recalc(); renderGrid(); updateUI();
             }
         }
@@ -171,16 +200,14 @@
         }
 
         function buyNode(cost, inc) {
-            if(state.lumis >= cost) {
-                state.lumis -= cost; state.nodeIncome += inc; recalc(); updateUI();
-            }
+            if(state.lumis >= cost) { state.lumis -= cost; state.nodeIncome += inc; recalc(); updateUI(); }
         }
 
-        function addMoney(val) { state.lumis += val; updateUI(); alert("Reward added!"); }
+        function claim(r) { state.lumis += parseFloat(r); updateUI(); }
 
         function recalc() {
             let total = state.nodeIncome;
-            state.grid.forEach(lvl => { if(lvl) total += 0.05 * Math.pow(2.2, lvl-1); });
+            state.grid.forEach(lvl => { if(lvl) total += state.config.l1 * Math.pow(2.2, lvl-1); });
             state.hp = total;
         }
 
@@ -193,11 +220,11 @@
 
         setInterval(() => {
             if(state.hp > 0) state.lumis += (state.hp / 3600);
-            if(state.energy < 100) state.energy += 0.4;
+            if(state.energy < 100) state.energy += state.config.regen;
             updateUI();
         }, 1000);
 
-        loadData(); recalc(); renderGrid(); updateUI();
+        window.onload = initGame;
     </script>
 </body>
 </html>
