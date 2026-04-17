@@ -1,0 +1,44 @@
+{
+  "farms": [
+    {
+      "name": "Нейронний Вузол",
+      "desc": "+1 KLYN/сек",
+      "price": 0.5,
+      "add": 1
+    },
+    {
+      "name": "Матриця Пам’яті",
+      "desc": "+10 KLYN/сек",
+      "price": 4.0,
+      "add": 10
+    },
+    {
+      "name": "ШІ Ядро Люміса",
+      "desc": "+50 KLYN/сек",
+      "price": 15.0,
+      "add": 50
+    }
+  ],
+  "tasks": [
+    {
+      "name": "AI Community Labs (TG)",
+      "reward": 300,
+      "url": "https://t.me/aicommunitylabs"
+    },
+    {
+      "name": "AI Project (TG)",
+      "reward": 300,
+      "url": "https://t.me/aiproject231"
+    },
+    {
+      "name": "Loomis Channel (TG)",
+      "reward": 300,
+      "url": "https://t.me/Loomis45"
+    },
+    {
+      "name": "AI Community (YouTube)",
+      "reward": 400,
+      "url": "https://www.youtube.com/@aicommunitylabs"
+    }
+  ]
+}
