@@ -3,225 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumis: Lab Awakening</title>
+    <title>Lumis Universe</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --neon-blue: #00f2ff;
             --ai-purple: #bc00ff;
             --klyn-gold: #ffcc00;
-            --lab-bg: #0a0c10;
+            --bg-dark: #050505;
         }
-        body { font-family: 'Courier New', monospace; background-color: var(--lab-bg); color: white; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Лабораторний фон з ефектом сітки */
-        .lab-container {
-            flex: 1;
-            background-image: 
-                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg-dark); 
+            color: white; margin: 0; padding: 0; 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
         }
 
-        .header { width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.8); border-bottom: 1px solid var(--ai-purple); text-align: center; z-index: 10; }
-        
-        /* Камера інкубації */
-        .incubation-chamber {
-            width: 220px;
-            height: 280px;
-            margin-top: 40px;
-            border: 2px solid rgba(0, 242, 255, 0.3);
-            border-radius: 110px 110px 20px 20px;
-            position: relative;
-            background: rgba(0, 242, 255, 0.02);
-            box-shadow: inset 0 0 50px rgba(0, 242, 255, 0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            cursor: pointer;
+        /* Верхня частина з балансом */
+        .header {
+            padding: 15px; background: #000;
+            border-bottom: 1px solid var(--neon-blue);
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+        .balance-info div { font-weight: bold; }
+        #l-bal { color: var(--neon-blue); font-size: 20px; }
+        #k-bal { color: var(--klyn-gold); font-size: 14px; }
+
+        /* Контейнер сторінок */
+        .main-content { flex: 1; position: relative; overflow-y: auto; display: flex; flex-direction: column; }
+        .page { display: none; width: 100%; height: 100%; padding: 20px; box-sizing: border-box; flex-direction: column; align-items: center; }
+        .active-page { display: flex; }
+
+        /* Екран клікера (Синтез) */
+        .coin-container {
+            width: 280px; height: 280px; margin: 40px 0;
+            position: relative; cursor: pointer; transition: transform 0.05s;
+        }
+        .coin-container:active { transform: scale(0.92); }
+        #coin-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.3)); }
+
+        /* Картки для завдань/майнінгу */
+        .card {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid #222;
+            border-radius: 15px; width: 95%; padding: 15px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn-action {
+            background: var(--neon-blue); color: black; border: none;
+            padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer;
         }
 
-        /* Ефект "рідини" або пари в камері */
-        .liquid {
-            position: absolute;
-            bottom: 0; width: 100%; height: 20%;
-            background: var(--neon-blue);
-            opacity: 0.2;
-            filter: blur(20px);
-            animation: wave 3s infinite ease-in-out;
+        /* Нижня навігація */
+        .nav-bar {
+            background: #000; border-top: 1px solid #222;
+            display: flex; padding: 10px 0 25px 0; /* padding знизу для iPhone */
         }
-
-        /* Люміс, що оживає */
-        #lumis-avatar {
-            font-size: 80px;
-            filter: drop-shadow(0 0 20px var(--neon-blue));
-            transition: all 0.5s ease;
-            z-index: 5;
-            user-select: none;
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            color: #555; font-size: 11px; cursor: pointer; transition: 0.3s;
         }
+        .nav-item.active { color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
+        .nav-icon { font-size: 22px; margin-bottom: 4px; }
 
-        .pulse { animation: pulse-anim 2s infinite; }
-        @keyframes pulse-anim {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 30px var(--neon-blue)); }
-            100% { transform: scale(1); opacity: 0.8; }
+        /* Ефект вильоту +1 */
+        .tap-effect {
+            position: absolute; color: var(--neon-blue); font-weight: bold;
+            pointer-events: none; animation: floatUp 0.6s ease-out forwards;
         }
-
-        @keyframes wave {
-            0%, 100% { height: 15%; }
-            50% { height: 25%; }
-        }
-
-        /* Кнопки та інтерфейс */
-        .nav-bar { display: flex; background: #000; padding: 12px 0; border-top: 1px solid #222; width: 100%; }
-        .nav-item { flex: 1; text-align: center; font-size: 10px; color: #444; cursor: pointer; }
-        .nav-item.active-nav { color: var(--neon-blue); }
-
-        .stats-overlay { position: absolute; bottom: 20px; left: 20px; font-size: 10px; color: var(--neon-blue); text-align: left; }
-        
-        .click-hint { position: absolute; top: 10px; font-size: 10px; color: #444; animation: blink 2s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        .page { display: none; width: 100%; height: 100%; padding: 20px; box-sizing: border-box; overflow-y: auto; text-align: center; }
-        .active { display: flex; flex-direction: column; align-items: center; }
+        @keyframes floatUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-100px); } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-size: 10px; color: #888; margin-bottom: 5px;">ОБ'ЄКТ: LUMIS | СТАТУС: <span id="status-name" style="color: var(--neon-blue);">ІНКУБАЦІЯ</span></div>
-        <div id="lumis-balance" style="font-size: 22px; font-weight: bold; color: var(--neon-blue);">0.00 L</div>
-        <div id="klyn-balance" style="font-size: 14px; color: var(--klyn-gold);">0 KLYN ENERGY</div>
+        <div class="balance-info">
+            <div id="l-bal">0.00 L</div>
+            <div id="k-bal">0 KLYN</div>
+        </div>
+        <div style="font-size: 10px; color: #444;">ID: <span id="uid">USER_01</span></div>
     </div>
 
-    <div class="lab-container">
-        <div id="mining" class="page active">
-            <div class="click-hint">НАТИСНІТЬ ДЛЯ СИНХРОНІЗАЦІЇ</div>
-            <div class="incubation-chamber" onclick="clickMine(event)">
-                <div class="liquid"></div>
-                <div id="lumis-avatar" class="pulse">🧪</div>
+    <div class="main-content">
+        <div id="p-home" class="page active-page">
+            <div class="coin-container" onclick="handleTap(event)">
+                <img src="lumis_coin.png" id="coin-img" onerror="this.src='https://via.placeholder.com/280?text=LumisCoin'">
             </div>
-            
-            <div class="stats-overlay">
-                РІВЕНЬ ЗЛИТТЯ: <span id="level-num">1</span><br>
-                ПОТУЖНІСТЬ: +<span id="rate">1</span>/с
-            </div>
-
-            <button onclick="exchangeCurrency()" style="margin-top: 30px; background: transparent; border: 1px solid var(--klyn-gold); color: var(--klyn-gold); padding: 12px 20px; font-family: inherit; cursor: pointer;">
-                СИНТЕЗУВАТИ LUMIS (1000 KLYN)
+            <p style="color: #666; font-style: italic;">Торкніться монети для генерації енергії</p>
+            <button class="btn-action" style="width: 80%; background: none; border: 1px solid var(--klyn-gold); color: var(--klyn-gold); margin-top: 20px;" onclick="convert()">
+                КОНВЕРТУВАТИ (1000 KLYN ➔ 0.1 L)
             </button>
         </div>
 
-        <div id="shop" class="page">
-            <h2 style="color: var(--neon-blue);">ЛАБОРАТОРНІ МОДУЛІ</h2>
-            <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 10px; width: 100%; border-left: 3px solid var(--ai-purple); display: flex; justify-content: space-between; align-items: center;">
-                <div style="text-align: left;"><strong>Нейро-ін'єкція</strong><br><small>+1 до видобутку</small></div>
-                <button onclick="buyUpgrade(0.5, 1)" style="background: var(--neon-blue); border: none; padding: 8px; border-radius: 4px; font-weight: bold;">0.5 L</button>
+        <div id="p-farm" class="page">
+            <h2 style="color: var(--neon-blue);">ПАВИННИЙ ВИДОБУТОК</h2>
+            <div class="card">
+                <div><strong>Нейронна мережа</strong><br><small>+1 KLYN/сек</small></div>
+                <button class="btn-action" onclick="upgrade(0.5, 1)">0.5 L</button>
             </div>
+            <div class="card">
+                <div><strong>AI Сервер</strong><br><small>+5 KLYN/сек</small></div>
+                <button class="btn-action" onclick="upgrade(2.0, 5)">2.0 L</button>
+            </div>
+        </div>
+
+        <div id="p-tasks" class="page">
+            <h2 style="color: var(--neon-blue);">QUESTS</h2>
+            <div class="card">
+                <div>Підписка на канал<br><small>+500 KLYN</small></div>
+                <button class="btn-action">GO</button>
+            </div>
+        </div>
+
+        <div id="p-profile" class="page">
+            <h2 style="color: var(--neon-blue);">МІЙ ГАМАНЕЦЬ</h2>
+            <div class="card" style="flex-direction: column; align-items: flex-start;">
+                <p>Lumis Balance: <span style="color: var(--neon-blue)">0.00</span></p>
+                <p>Energy Power: <span style="color: var(--klyn-gold)">1/tap</span></p>
+            </div>
+            <button class="btn-action" style="width: 100%; padding: 15px; margin-top: 20px;" onclick="alert('Скоро...')">CONNECT WALLET</button>
         </div>
     </div>
 
     <div class="nav-bar">
-        <div class="nav-item active-nav" onclick="showPage('mining', this)">ЛАБОРАТОРІЯ</div>
-        <div class="nav-item" onclick="showPage('shop', this)">МОДУЛІ</div>
+        <div class="nav-item active" onclick="switchPage('p-home', this)">
+            <span class="nav-icon">🎮</span>
+            <span>СИНТЕЗ</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('p-farm', this)">
+            <span class="nav-icon">⛏</span>
+            <span>МАЙНІНГ</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('p-tasks', this)">
+            <span class="nav-icon">📋</span>
+            <span>ЗАВДАННЯ</span>
+        </div>
+        <div class="nav-item" onclick="switchPage('p-profile', this)">
+            <span class="nav-icon">👤</span>
+            <span>ПРОФІЛЬ</span>
+        </div>
     </div>
 
     <script>
-        let klyn = parseFloat(localStorage.getItem('klyn')) || 0;
-        let lumis = parseFloat(localStorage.getItem('lumis')) || 0;
-        let rate = parseInt(localStorage.getItem('rate')) || 1;
-        let totalMined = parseFloat(localStorage.getItem('totalMined')) || 0;
-
-        // Етапи еволюції Люміса
-        const evolution = [
-            { level: 1, icon: '🧪', name: 'ІНКУБАЦІЯ', color: '#00f2ff' },
-            { level: 2, icon: '🧬', name: 'ГЕНЕЗИС', color: '#bc00ff' },
-            { level: 3, icon: '🧠', name: 'НЕЙРО-МЕРЕЖА', color: '#00ff88' },
-            { level: 4, icon: '👤', name: 'АНДРОЇД', color: '#ff0055' },
-            { level: 5, icon: '⚡', name: 'ГІБРИД', color: '#ffff00' },
-            { level: 6, icon: '🛡️', name: 'ГЕРОЙ', color: '#ffffff' }
-        ];
+        let klyn = parseFloat(localStorage.getItem('k_v5')) || 0;
+        let lumis = parseFloat(localStorage.getItem('l_v5')) || 0;
+        let rate = parseInt(localStorage.getItem('r_v5')) || 0;
 
         function updateUI() {
-            document.getElementById('klyn-balance').innerText = Math.floor(klyn) + " KLYN ENERGY";
-            document.getElementById('lumis-balance').innerText = lumis.toFixed(2) + " L";
-            document.getElementById('rate').innerText = rate;
-
-            let currentLevel = Math.min(Math.floor(totalMined / 1000) + 1, 6);
-            let stage = evolution[currentLevel - 1];
-
-            document.getElementById('level-num').innerText = currentLevel;
-            document.getElementById('status-name').innerText = stage.name;
-            document.getElementById('status-name').style.color = stage.color;
-            
-            let avatar = document.getElementById('lumis-avatar');
-            avatar.innerText = stage.icon;
-            avatar.style.filter = `drop-shadow(0 0 20px ${stage.color})`;
-            
-            localStorage.setItem('klyn', klyn);
-            localStorage.setItem('lumis', lumis);
-            localStorage.setItem('rate', rate);
-            localStorage.setItem('totalMined', totalMined);
+            document.getElementById('k-bal').innerText = Math.floor(klyn) + " KLYN";
+            document.getElementById('l-bal').innerText = lumis.toFixed(2) + " L";
+            localStorage.setItem('k_v5', klyn);
+            localStorage.setItem('l_v5', lumis);
+            localStorage.setItem('r_v5', rate);
         }
 
-        function clickMine(event) {
+        function handleTap(e) {
             klyn += 1;
-            totalMined += 1;
-            
-            // Ефект частинок
-            let particle = document.createElement('div');
-            particle.innerText = '+1';
-            particle.style.position = 'absolute';
-            particle.style.left = event.clientX + 'px';
-            particle.style.top = event.clientY + 'px';
-            particle.style.color = 'var(--neon-blue)';
-            particle.style.pointerEvents = 'none';
-            particle.animate([
-                { transform: 'translateY(0)', opacity: 1 },
-                { transform: 'translateY(-50px)', opacity: 0 }
-            ], { duration: 600 });
-            document.body.appendChild(particle);
-            setTimeout(() => particle.remove(), 600);
-
+            // Анімація вильоту +1
+            const p = document.createElement('div');
+            p.className = 'tap-effect';
+            p.innerText = '+1';
+            p.style.left = e.clientX + 'px';
+            p.style.top = e.clientY + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 600);
             updateUI();
         }
 
-        function exchangeCurrency() {
-            if (klyn >= 1000) {
-                klyn -= 1000;
-                lumis += 0.10;
-                updateUI();
-            }
+        function switchPage(pageId, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active-page');
+            el.classList.add('active');
         }
 
-        function buyUpgrade(cost, addRate) {
-            if (lumis >= cost) {
-                lumis -= cost;
-                rate += addRate;
-                updateUI();
-            }
+        function convert() {
+            if (klyn >= 1000) { klyn -= 1000; lumis += 0.1; updateUI(); }
+            else { alert("Потрібно 1000 KLYN"); }
         }
 
-        function showPage(pageId, navEl) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
-            document.getElementById(pageId).classList.add('active');
-            navEl.classList.add('active-nav');
+        function upgrade(cost, add) {
+            if (lumis >= cost) { lumis -= cost; rate += add; updateUI(); }
+            else { alert("Недостатньо Lumis"); }
         }
 
-        setInterval(() => {
-            klyn += rate;
-            totalMined += rate;
-            updateUI();
-        }, 1000);
+        // Авто-майнінг
+        setInterval(() => { if(rate > 0) { klyn += rate; updateUI(); } }, 1000);
 
         updateUI();
-        window.Telegram.WebApp.expand();
+        Telegram.WebApp.expand();
     </script>
 </body>
 </html>
+
